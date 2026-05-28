@@ -27,6 +27,12 @@ import IncomingRidePage from './pages/driver/IncomingRidePage';
 import DriverActiveRidePage from './pages/driver/DriverActiveRidePage';
 import EarningsPage from './pages/driver/EarningsPage';
 
+// Admin pages
+import AdminDashboard from './pages/admin/AdminDashboard';
+import UsersPage from './pages/admin/UsersPage';
+import RidesPage from './pages/admin/RidesPage';
+import PaymentsPage from './pages/admin/PaymentsPage';
+
 function AppLayout({ children }: { children: React.ReactNode }) {
   return (
     <div className="h-screen w-screen flex flex-col">
@@ -34,6 +40,14 @@ function AppLayout({ children }: { children: React.ReactNode }) {
       <Navbar />
     </div>
   );
+}
+
+function getDefaultRoute(role?: string): string {
+  switch (role) {
+    case 'admin': return '/admin';
+    case 'driver': return '/driver';
+    default: return '/';
+  }
 }
 
 export default function App() {
@@ -72,8 +86,8 @@ export default function App() {
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element={isSignedIn ? <Navigate to={user?.role === 'driver' ? '/driver' : '/'} replace /> : <LoginPage />} />
-        <Route path="/register" element={isSignedIn ? <Navigate to={user?.role === 'driver' ? '/driver' : '/'} replace /> : <RegisterPage />} />
+        <Route path="/login" element={isSignedIn ? <Navigate to={getDefaultRoute(user?.role)} replace /> : <LoginPage />} />
+        <Route path="/register" element={isSignedIn ? <Navigate to={getDefaultRoute(user?.role)} replace /> : <RegisterPage />} />
         <Route path="/verify" element={<VerifyPage />} />
 
         {/* Rider routes */}
@@ -92,8 +106,14 @@ export default function App() {
         <Route path="/driver/active" element={<ProtectedRoute requiredRole="driver"><AppLayout><DriverActiveRidePage /></AppLayout></ProtectedRoute>} />
         <Route path="/driver/earnings" element={<ProtectedRoute requiredRole="driver"><AppLayout><EarningsPage /></AppLayout></ProtectedRoute>} />
 
+        {/* Admin routes */}
+        <Route path="/admin" element={<ProtectedRoute requiredRole="admin"><AppLayout><AdminDashboard /></AppLayout></ProtectedRoute>} />
+        <Route path="/admin/users" element={<ProtectedRoute requiredRole="admin"><AppLayout><UsersPage /></AppLayout></ProtectedRoute>} />
+        <Route path="/admin/rides" element={<ProtectedRoute requiredRole="admin"><AppLayout><RidesPage /></AppLayout></ProtectedRoute>} />
+        <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><AppLayout><PaymentsPage /></AppLayout></ProtectedRoute>} />
+
         {/* Catch-all */}
-        <Route path="*" element={<Navigate to={isSignedIn ? (user?.role === 'driver' ? '/driver' : '/') : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={isSignedIn ? getDefaultRoute(user?.role) : '/login'} replace />} />
       </Routes>
     </BrowserRouter>
   );

@@ -3,7 +3,7 @@ import { useAuth } from '../../store/useAuth';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
-  requiredRole?: 'rider' | 'driver';
+  requiredRole?: 'rider' | 'driver' | 'admin';
 }
 
 export default function ProtectedRoute({ children, requiredRole }: ProtectedRouteProps) {
@@ -15,8 +15,10 @@ export default function ProtectedRoute({ children, requiredRole }: ProtectedRout
   }
 
   if (requiredRole && user?.role !== requiredRole) {
-    // Redirect drivers to driver dashboard, riders to home
-    const redirectPath = user?.role === 'driver' ? '/driver' : '/';
+    // Redirect based on role
+    let redirectPath = '/';
+    if (user?.role === 'driver') redirectPath = '/driver';
+    if (user?.role === 'admin') redirectPath = '/admin';
     return <Navigate to={redirectPath} replace />;
   }
 

@@ -11,6 +11,7 @@ import authRouter from './services/auth';
 import rideRouter, { setRideSocketIO } from './services/ride';
 import matchingRouter, { setMatchingSocketIO } from './services/matching';
 import paymentRouter, { setPaymentSocketIO } from './services/payment';
+import adminRouter from './services/admin';
 
 // ============================================
 // Configuration
@@ -103,6 +104,7 @@ app.use('/api/auth', authRouter);
 app.use('/api/rides', rideRouter);
 app.use('/api/matching', matchingRouter);
 app.use('/api/payments', paymentRouter);
+app.use('/api/admin', adminRouter);
 
 // ============================================
 // Fare Estimate Endpoint (no auth required)
@@ -167,6 +169,7 @@ httpServer.listen(PORT, () => {
 ║  - Rides:         /api/rides/*                           ║
 ║  - Matching:      /api/matching/*                        ║
 ║  - Payments:      /api/payments/*                        ║
+║  - Admin:         /api/admin/*                           ║
 ║  - Fare Estimate: /api/fare-estimate                     ║
 ╠══════════════════════════════════════════════════════════╣
 ║  Environment: ${(process.env.NODE_ENV || 'development').padEnd(40)}║

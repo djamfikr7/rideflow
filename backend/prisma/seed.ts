@@ -23,6 +23,21 @@ async function main() {
   const otpPassword = await bcrypt.hash('otp-auth-no-password', 10);
 
   // ============================================
+  // Create admin user
+  // ============================================
+  const admin = await prisma.user.create({
+    data: {
+      email: 'admin@rideflow.local',
+      password: await bcrypt.hash('password123', 10),
+      fullName: 'Admin User',
+      phone: '+1111111111',
+      role: 'ADMIN',
+    },
+  });
+
+  console.log('Created admin user (phone: +1111111111, OTP: 123456)');
+
+  // ============================================
   // Create 3 test riders
   // ============================================
   const rider1 = await prisma.user.create({
@@ -375,6 +390,8 @@ async function main() {
   console.log('========================================');
   console.log('\nTest Accounts (OTP: 123456 for all):');
   console.log('-------------------------------------');
+  console.log('Admin:');
+  console.log('  +1111111111 - Admin User (admin@rideflow.local)');
   console.log('Riders:');
   console.log('  +1234567890 - Alice Johnson (rider@example.com)');
   console.log('  +1234567891 - Bob Smith (rider2@example.com)');
@@ -385,7 +402,7 @@ async function main() {
   console.log('  +1987654323 - Edward Norton (driver3@example.com)');
   console.log('\nSample Data:');
   console.log('------------');
-  console.log('  3 riders, 3 drivers');
+  console.log('  1 admin, 3 riders, 3 drivers');
   console.log('  5 rides (2 completed, 1 in-progress, 1 matched, 1 requested)');
   console.log('  3 ratings');
   console.log('  2 cash payments (all confirmed)');

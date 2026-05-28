@@ -11,7 +11,9 @@ export default function Navbar() {
   if (!user) return null;
 
   const isDriver = user.role === 'driver';
+  const isAdmin = user.role === 'admin';
   const isDriverRoute = location.pathname.startsWith('/driver');
+  const isAdminRoute = location.pathname.startsWith('/admin');
 
   const handleSignOut = () => {
     if (isOnline) goOffline();
@@ -31,7 +33,16 @@ export default function Navbar() {
     { to: '/profile', label: 'Profile', icon: '👤' },
   ];
 
-  const links = isDriverRoute ? driverLinks : riderLinks;
+  const adminLinks = [
+    { to: '/admin', label: 'Dashboard', icon: '📊' },
+    { to: '/admin/users', label: 'Users', icon: '👥' },
+    { to: '/admin/rides', label: 'Rides', icon: '🚗' },
+    { to: '/admin/payments', label: 'Payments', icon: '💳' },
+  ];
+
+  let links = riderLinks;
+  if (isAdminRoute) links = adminLinks;
+  else if (isDriverRoute) links = driverLinks;
 
   return (
     <nav className="bg-white border-t border-gray-200 fixed bottom-0 left-0 right-0 z-50 safe-area-bottom">
