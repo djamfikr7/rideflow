@@ -54,6 +54,11 @@
 | Socket.IO for real-time | Auto-reconnection, room-based events, matches backend Socket.IO server |
 | Separate stores per domain | `useAuth`, `useLocation`, `useRide`, `useDriver` — each store is focused and testable |
 | `EXPO_PUBLIC_*` env vars | Only these are exposed to the client; secrets stay server-side |
+| Haversine for distance | Client-side straight-line distance without API calls; good enough for fare estimates |
+| expo-location geocoding | Built-in geocoding/reverse geocoding; no Places Autocomplete dependency needed |
+| Simulated ride lifecycle | Mock driver matching (3-5s), movement simulation (15% per tick), status auto-progression for demo |
+| Status-aware polylines | Different polyline colors/patterns per ride status (green=arriving, blue=in-progress, dashed=preview) |
+| Multi-step ride request | Search -> route preview -> ride type selection -> confirm; avoids overwhelming user |
 
 ---
 
@@ -74,7 +79,10 @@ rideflow/
       history.tsx             # Ride history (placeholder)
       profile.tsx             # Profile + sign out
       ride/                   # Ride flow (hidden from tabs)
-        request.tsx           # Ride type selection + fare estimate (placeholder)
+        request.tsx           # Location search, route preview, ride type selection, fare estimate, confirm
+        matching.tsx          # Driver matching animation, cancel, mock driver assignment
+        active.tsx            # Active ride: map with driver tracking, status stepper, DriverInfoCard
+        complete.tsx          # Ride completion: star rating, comment, receipt view
     (driver)/                 # Driver tab group (Tabs navigator)
       _layout.tsx             # Driver Tabs layout (Dashboard, Earnings, Profile)
       index.tsx               # Dashboard: online toggle + stats
@@ -88,21 +96,23 @@ rideflow/
       Card.tsx                # White card with border and rounded corners
       LoadingSpinner.tsx      # Centered ActivityIndicator with optional message
     map/
-      RideMap.tsx             # Google Map with pickup/destination markers
+      RideMap.tsx             # Google Map with markers, polylines, driver tracking, crosshair button
+    ride/
+      DriverInfoCard.tsx      # Driver avatar, star rating, vehicle info, call/message buttons
   lib/
     api.ts                    # Axios instance (baseURL from constants, auth interceptor stub)
     clerk.ts                  # ClerkProvider, tokenCache (expo-secure-store), publishableKey
-    constants.ts              # API_URL, RIDE_TYPES, fare constants, COLORS
-    location.ts               # getCurrentLocation, reverseGeocode, searchPlaces, getRegionForCoordinates
+    constants.ts              # API_URL, RIDE_TYPES, fare constants (BASE_FARE, PER_KM_RATE, PER_MINUTE_RATE), COLORS
+    location.ts               # getCurrentLocation, reverseGeocode, geocodeSearch, haversineDistance, formatDistance, estimateDurationMinutes, getRegionForCoordinates
     socket.ts                 # Socket.IO singleton (getSocket, connectSocket, disconnectSocket)
     useAuth.ts                # Auth guard hook (redirect logic based on Clerk state)
   store/
     useAuth.ts                # User state: user, isSignedIn, setRole, signOut
     useLocation.ts            # Location state: currentLocation, pickup, destination
-    useRide.ts                # Ride state: currentRide, driver, fareEstimates, selectedRideType, isMatching
+    useRide.ts                # Ride state: currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, updateDriverLocation, submitRating, clearRide
     useDriver.ts              # Driver mode state: isOnline, todayEarnings, todayRides, incomingRideId
   types/
-    ride.ts                   # Ride, RideStatus, RideType, Location, FareEstimate, DriverInfo
+    ride.ts                   # Ride, RideStatus, RideType, Location, FareEstimate, DriverInfo, RideRating
     user.ts                   # User, UserRole, DriverProfile
     api.ts                    # ApiResponse<T>, ApiError, PaginatedResponse<T>
     declarations.d.ts         # CSS module type declaration
@@ -118,6 +128,7 @@ rideflow/
   AGENTS.md                   # Agent instructions for building the project
   UBER_CLONE_SPEC.md          # Full implementation specification
   RTM.md                      # Requirements Traceability Matrix
+  CHANGELOG.md                # Release history
 ```
 
 ---
