@@ -1,0 +1,207 @@
+// RideFlow - Uber Clone Database Schema
+// PostgreSQL with Prisma ORM
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+// ============================================
+// Users (Riders and Drivers)
+// ============================================
+model User {
+  id        String   @id @default(uuid()) @db.Uuid
+  email     String   @unique
+  password  String
+  fullName  String   @map("full_name")
+  phone     String?
+  avatarUrl String?  @map("avatar_url")
+  role      UserRole @default(RIDER)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  driverProfile    DriverProfile?
+  riderRides       Ride[]          @relation("RiderRides")
+  driverRides      Ride[]          @relation("DriverRides")
+  ratingsGiven     Rating[]        @relation("RatingFrom")
+  ratingsReceived  Rating[]        @relation("RatingTo")
+  payments         Payment[]
+  notifications    Notification[]
+
+  @@map("users")
+}
+
+enum UserRole {
+  RIDER
+  DRIVER
+}
+
+// ============================================
+// Driver Profiles
+// ============================================
+model DriverProfile {
+  id            String   @id @default(uuid()) @db.Uuid
+  userId        String   @unique @map("user_id") @db.Uuid
+  vehicleMake   String   @map("vehicle_make")
+  vehicleModel  String   @map("vehicle_model")
+  vehicleYear   Int      @map("vehicle_year")
+  vehicleColor  String   @map("vehicle_color")
+  licensePlate  String   @map("license_plate")
+  vehicleType   VehicleType @default(STANDARD) @map("vehicle_type")
+  isAvailable   Boolean  @default(false) @map("is_available")
+  currentLat    Float?   @map("current_lat")
+  currentLng    Float?   @map("current_lng")
+  rating        Float    @default(5.0)
+  totalRides    Int      @default(0) @map("total_rides")
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("driver_profiles")
+}
+
+enum VehicleType {
+  STANDARD
+  COMFORT
+  PREMIUM
+}
+
+// ============================================
+// Rides
+// ============================================
+model Ride {
+  id                   String     @id @default(uuid()) @db.Uuid
+  riderId              String     @map("rider_id") @db.Uuid
+  driverId             String?    @map("driver_id") @db.Uuid
+  status               RideStatus @default(REQUESTED)
+
+  // Pickup location
+  pickupLat            Float      @map("pickup_lat")
+  pickupLng            Float      @map("pickup_lng")
+  pickupAddress        String     @map("pickup_address")
+
+  // Destination
+  destinationLat       Float      @map("destination_lat")
+  destinationLng       Float      @map("destination_lng")
+  destinationAddress   String     @map("destination_address")
+
+  // Ride details
+  rideType             VehicleType @default(STANDARD) @map("ride_type")
+  fareEstimate         Float?     @map("fare_estimate")
+  fareFinal            Float?     @map("fare_final")
+  distanceKm           Float?     @map("distance_km")
+  durationMinutes      Int?       @map("duration_minutes")
+
+  // Timestamps
+  requestedAt          DateTime   @default(now()) @map("requested_at")
+  matchedAt            DateTime?  @map("matched_at")
+  startedAt            DateTime?  @map("started_at")
+  completedAt          DateTime?  @map("completed_at")
+  cancelledAt          DateTime?  @map("cancelled_at")
+  cancellationReason   String?    @map("cancellation_reason")
+
+  createdAt            DateTime   @default(now()) @map("created_at")
+
+  // Relations
+  rider     User     @relation("RiderRides", fields: [riderId], references: [id])
+  driver    User?    @relation("DriverRides", fields: [driverId], references: [id])
+  ratings   Rating[]
+  payments  Payment[]
+
+  @@map("rides")
+}
+
+enum RideStatus {
+  REQUESTED
+  MATCHED
+  DRIVER_ARRIVING
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+// ============================================
+// Ratings
+// ============================================
+model Rating {
+  id         String   @id @default(uuid()) @db.Uuid
+  rideId     String   @map("ride_id") @db.Uuid
+  fromUserId String   @map("from_user_id") @db.Uuid
+  toUserId   String   @map("to_user_id") @db.Uuid
+  score      Int      @db.SmallInt
+  comment    String?
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  ride     Ride @relation(fields: [rideId], references: [id])
+  fromUser User @relation("RatingFrom", fields: [fromUserId], references: [id])
+  toUser   User @relation("RatingTo", fields: [toUserId], references: [id])
+
+  @@map("ratings")
+}
+
+// ============================================
+// Payments
+// ============================================
+model Payment {
+  id                    String        @id @default(uuid()) @db.Uuid
+  rideId                String        @map("ride_id") @db.Uuid
+  userId                String        @map("user_id") @db.Uuid
+  stripePaymentIntentId String?       @map("stripe_payment_intent_id")
+  amount                Float
+  currency              String        @default("USD")
+  status                PaymentStatus @default(PENDING)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  ride Ride @relation(fields: [rideId], references: [id])
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("payments")
+}
+
+enum PaymentStatus {
+  PENDING
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+// ============================================
+// Notifications
+// ============================================
+model Notification {
+  id        String           @id @default(uuid()) @db.Uuid
+  userId    String           @map("user_id") @db.Uuid
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  read      Boolean          @default(false)
+
+  createdAt DateTime @default(now()) @map("created_at")
+
+  // Relations
+  user User @relation(fields: [userId], references: [id])
+
+  @@map("notifications")
+}
+
+enum NotificationType {
+  RIDE_REQUESTED
+  DRIVER_MATCHED
+  RIDE_STATUS_UPDATE
+  PAYMENT_PROCESSED
+  RATING_RECEIVED
+}
