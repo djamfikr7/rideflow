@@ -167,11 +167,11 @@ Every prompt must follow the 4-part structure:
 | Milestone | Requirements | Verified | Status |
 |-----------|-------------|----------|--------|
 | M1: Foundation | 31 | 31 | **COMPLETE** |
-| M2: Ride Booking | 6 | 0 | **IN PROGRESS** (REQ-2.1 assigned to Frontend Agent) |
-| M3: Active Ride | 4 | 0 | Not started |
+| M2: Ride Booking | 6 | 6 | **COMPLETE** |
+| M3: Active Ride | 4 | 4 | **COMPLETE** |
 | M4: Driver Mode | 4 | 0 | Not started |
 | M5: Payments & Polish | 3 | 0 | Not started |
-| **Total** | **48** | **31** | **64.6% verified** |
+| **Total** | **48** | **41** | **85.4% verified** |
 
 ### M1 Completion Summary (31/31 verified on 2026-05-27)
 All foundation requirements verified in a single session across three task groups:
@@ -179,16 +179,34 @@ All foundation requirements verified in a single session across three task group
 - **TASK-1.2:** Clerk authentication — onboarding, login, register, role selection, auth guard (REQ-1.9 through REQ-1.12, REQ-1.20 through REQ-1.25)
 - **TASK-1.3:** Rider home screen with map, location permissions, current location marker, "Where to?" bar (REQ-1.13 through REQ-1.18, REQ-1.26 through REQ-1.30)
 
-### M2 Status
-- **REQ-2.1 (Google Maps integration):** Assigned to Frontend Agent — `app/(rider)/ride/request.tsx` is currently a placeholder screen. Needs Places Autocomplete, route polyline, distance/time estimation.
-- Screens `history.tsx`, `earnings.tsx`, `incoming.tsx` are still placeholder shells.
+### M2 Completion Summary (6/6 verified on 2026-05-28)
+Full ride booking flow implemented across five task groups:
+- **TASK-6 (REQ-2.3):** Route polyline display using `react-native-maps` Polyline, haversine distance calculation, formatDistance helper
+- **TASK-7 (REQ-2.4, REQ-2.5):** Ride type selection cards (Standard/Comfort/Premium) with fare calculation using BASE_FARE + PER_KM_RATE * multiplier + PER_MINUTE_RATE
+- **TASK-8 (REQ-2.1):** Google Maps integration — RideMap component with PROVIDER_GOOGLE, auto-fit region, crosshair "my location" button
+- **TASK-9 (REQ-2.2):** Location search using expo-location geocodeAsync + reverseGeocodeAsync (geocodeSearch helper with timeout and limit)
+- **TASK-10 (REQ-2.6):** Ride request + matching flow — request.tsx multi-step (search -> preview -> ride type -> confirm), matching.tsx with pulsing animation and mock driver assignment
+
+### M3 Completion Summary (4/4 verified on 2026-05-28)
+Active ride experience implemented across four task groups:
+- **TASK-11 (REQ-3.1):** Real-time driver location tracking — simulated driver movement (15% per tick toward target every 2s), driver marker on map, updateDriverLocation store action
+- **TASK-12 (REQ-3.2):** Driver info card component — avatar, star rating (half-star support), ride count, vehicle details, license plate, call/message action buttons
+- **TASK-13 (REQ-3.4):** Ride completion + rating — 5-star rating with labels (Terrible/Good/Excellent), optional comment, receipt view with route/driver/fare/rating summary
+- **TASK-14 (REQ-3.3):** Status-aware polylines — green (driver_arriving: driver to pickup), blue (in_progress: pickup to destination), dashed blue (preview: no active ride)
+
+### Placeholder Screens (not yet implemented)
+| Screen | Current State | Next Milestone |
+|--------|--------------|----------------|
+| `app/(rider)/history.tsx` | Placeholder text | M5 — ride history list |
+| `app/(driver)/earnings.tsx` | Placeholder text | M5 — earnings history |
+| `app/(driver)/ride/incoming.tsx` | Placeholder text | M4 — incoming ride request UI |
 
 ### TypeScript Status
 - `npx tsc --noEmit` passes with **zero errors** (verified 2026-05-28).
 
 ### Git Status
 - Single commit: `3aa962d Initial commit` on branch `master`.
-- Working tree has uncommitted changes (new files from M1 work).
+- Working tree has uncommitted changes (new files from M1-M3 work).
 
 ---
 
@@ -212,9 +230,9 @@ All foundation requirements verified in a single session across three task group
 | `app/_layout.tsx` | Root layout — imports global.css, wraps app in ClerkProvider, defines Stack |
 | `lib/useAuth.ts` | Auth guard — redirects unauthenticated users to (auth), signed-in users to (rider) |
 | `lib/clerk.ts` | Clerk config — publishableKey from env, tokenCache via expo-secure-store |
-| `lib/constants.ts` | API_URL, RIDE_TYPES array, fare rate constants, COLORS object |
+| `lib/constants.ts` | API_URL, RIDE_TYPES array, fare rate constants (BASE_FARE, PER_KM_RATE, PER_MINUTE_RATE), COLORS object |
 | `lib/api.ts` | Axios instance with base URL, auth token interceptor (TODO), error interceptor |
-| `lib/location.ts` | Location helpers: getCurrentLocation, reverseGeocode, searchPlaces, getRegionForCoordinates |
+| `lib/location.ts` | Location helpers: getCurrentLocation, reverseGeocode, geocodeSearch, haversineDistance, formatDistance, estimateDurationMinutes, getRegionForCoordinates |
 | `lib/socket.ts` | Socket.IO singleton: getSocket, connectSocket(userId), disconnectSocket |
 
 ### State Management
