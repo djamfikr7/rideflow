@@ -133,8 +133,8 @@ export default function ActiveRide() {
     router.replace("/(rider)/ride/request");
   };
 
-  const handleRate = () => {
-    router.push("/(rider)/ride/complete");
+  const handlePayment = () => {
+    router.push("/(rider)/ride/payment");
   };
 
   const rideTypeInfo = currentRide
@@ -263,10 +263,10 @@ export default function ActiveRide() {
       <View className="px-6 pb-6" style={{ paddingBottom: insets.bottom + 24 }}>
         {rideStatus === "completed" ? (
           <Pressable
-            onPress={handleRate}
+            onPress={handlePayment}
             className="bg-black rounded-full py-4 items-center justify-center active:opacity-80"
           >
-            <Text className="text-white text-lg font-semibold">Rate Your Ride</Text>
+            <Text className="text-white text-lg font-semibold">Proceed to Payment</Text>
           </Pressable>
         ) : (
           <Pressable

@@ -1,5 +1,5 @@
 import { create } from "zustand";
-import type { Ride, DriverInfo, FareEstimate, RideType, RideRating } from "../types/ride";
+import type { Ride, DriverInfo, FareEstimate, RideType, RideRating, PaymentMethod } from "../types/ride";
 
 interface RideState {
   currentRide: Ride | null;
@@ -8,6 +8,7 @@ interface RideState {
   selectedRideType: RideType;
   isMatching: boolean;
   lastRating: RideRating | null;
+  paymentMethod: PaymentMethod;
 
   setCurrentRide: (ride: Ride | null) => void;
   setDriver: (driver: DriverInfo | null) => void;
@@ -16,6 +17,7 @@ interface RideState {
   setIsMatching: (matching: boolean) => void;
   updateDriverLocation: (lat: number, lng: number) => void;
   submitRating: (stars: number, comment?: string) => void;
+  setPaymentMethod: (method: PaymentMethod) => void;
   clearRide: () => void;
 }
 
@@ -26,6 +28,7 @@ export const useRide = create<RideState>((set) => ({
   selectedRideType: "standard",
   isMatching: false,
   lastRating: null,
+  paymentMethod: "card",
 
   setCurrentRide: (ride) => set({ currentRide: ride }),
   setDriver: (driver) => set({ driver }),
@@ -44,6 +47,7 @@ export const useRide = create<RideState>((set) => ({
         submittedAt: new Date().toISOString(),
       },
     }),
+  setPaymentMethod: (method) => set({ paymentMethod: method }),
   clearRide: () =>
     set({
       currentRide: null,
@@ -51,5 +55,6 @@ export const useRide = create<RideState>((set) => ({
       fareEstimates: [],
       isMatching: false,
       lastRating: null,
+      paymentMethod: "card",
     }),
 }));

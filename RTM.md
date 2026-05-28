@@ -79,13 +79,13 @@
 
 ---
 
-## Milestone M5: Payments & Polish (NOT STARTED)
+## Milestone M5: Payments & Polish (COMPLETE)
 
 | REQ | Description | Status | Tasks | Artifacts | Verified |
 |-----|-------------|--------|-------|-----------|----------|
-| REQ-5.1 | Stripe payment integration | NOT_STARTED | — | — | — |
-| REQ-5.2 | Ride history with receipts | NOT_STARTED | — | — | — |
-| REQ-5.3 | Profile editing | NOT_STARTED | — | — | — |
+| REQ-5.1 | Simulated payment flow | VERIFIED | TASK-21 | payment.tsx, PaymentMethod type, useRide paymentMethod | 2026-05-28 |
+| REQ-5.2 | Ride history with receipts | VERIFIED | TASK-20 | history.tsx, receipt.tsx, useHistory.ts, 5 mock rides | 2026-05-28 |
+| REQ-5.3 | Profile editing | VERIFIED | TASK-19 | profile/edit.tsx, updateProfile in useAuth | 2026-05-28 |
 
 ---
 
@@ -97,5 +97,5 @@
 | M2: Ride Booking | 6 | 6 | 0 | 0 |
 | M3: Active Ride | 4 | 4 | 0 | 0 |
 | M4: Driver Mode | 4 | 4 | 0 | 0 |
-| M5: Payments | 3 | 0 | 0 | 3 |
-| **TOTAL** | **48** | **45** | **0** | **3** |
+| M5: Payments | 3 | 3 | 0 | 0 |
+| **TOTAL** | **48** | **48** | **0** | **0** |

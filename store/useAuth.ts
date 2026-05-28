@@ -7,6 +7,7 @@ interface AuthState {
   isLoading: boolean;
   setUser: (user: User | null) => void;
   setRole: (role: UserRole) => void;
+  updateProfile: (updates: Pick<User, "fullName"> & Partial<Pick<User, "phone">>) => void;
   signOut: () => void;
 }
 
@@ -21,6 +22,11 @@ export const useAuth = create<AuthState>((set) => ({
   setRole: (role) =>
     set((state) => ({
       user: state.user ? { ...state.user, role } : null,
+    })),
+
+  updateProfile: (updates) =>
+    set((state) => ({
+      user: state.user ? { ...state.user, ...updates } : null,
     })),
 
   signOut: () =>

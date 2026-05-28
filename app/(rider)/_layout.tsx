@@ -49,6 +49,7 @@ export default function RiderLayout() {
         }}
       />
       <Tabs.Screen name="ride" options={{ href: null }} />
+      <Tabs.Screen name="profile/edit" options={{ href: null }} />
     </Tabs>
   );
 }

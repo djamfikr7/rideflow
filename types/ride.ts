@@ -56,6 +56,8 @@ export interface DriverInfo {
   currentLng: number;
 }
 
+export type PaymentMethod = "card" | "cash" | "wallet";
+
 export interface RideRating {
   stars: number; // 1-5
   comment?: string;
