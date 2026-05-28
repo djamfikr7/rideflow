@@ -15,9 +15,11 @@ import paymentRouter, { setPaymentSocketIO } from './services/payment';
 // ============================================
 // Configuration
 // ============================================
-const PORT = parseInt(process.env.PORT || '3000', 10);
+const PORT = parseInt(process.env.PORT || '3010', 10);
 const CORS_ORIGIN = process.env.CORS_ORIGIN?.split(',') || [
   'http://localhost:5173',
+  'http://localhost:5174',
+  'http://localhost:3000',
   'http://localhost:8000',
   'http://localhost:19006',
 ];

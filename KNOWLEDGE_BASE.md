@@ -1,12 +1,30 @@
 # RideFlow Knowledge Base
 
-> Living document — updated after each milestone. Last updated: 2026-05-28 (ALL MILESTONES COMPLETE; 48/48 verified).
+> Structured wiki for the RideFlow Uber clone project. Last updated: 2026-05-28 (ALL MILESTONES COMPLETE; 48/48 verified).
+
+---
+
+## Wiki Structure
+
+This knowledge base is split into focused, self-contained sections for easier querying:
+
+| Section | File | Description |
+|---------|------|-------------|
+| **Master Index** | [KNOWLEDGE_BASE/INDEX.md](KNOWLEDGE_BASE/INDEX.md) | Quick reference table for every file, store, component, and lib module |
+| **Architecture Decisions** | [KNOWLEDGE_BASE/ADRS.md](KNOWLEDGE_BASE/ADRS.md) | 10 Architecture Decision Records (ADRs) |
+| **Store API Reference** | [KNOWLEDGE_BASE/STORES.md](KNOWLEDGE_BASE/STORES.md) | Zustand store state, actions, and usage examples |
+| **Component API Reference** | [KNOWLEDGE_BASE/COMPONENTS.md](KNOWLEDGE_BASE/COMPONENTS.md) | Component props, usage, and dependencies |
+| **Lib Module Reference** | [KNOWLEDGE_BASE/LIBS.md](KNOWLEDGE_BASE/LIBS.md) | Library module exports, signatures, and types |
+| **Backend Service Reference** | [KNOWLEDGE_BASE/BACKEND.md](KNOWLEDGE_BASE/BACKEND.md) | Express endpoints, Socket.IO events, database models |
+| **Decision Log** | [KNOWLEDGE_BASE/DECISIONS.md](KNOWLEDGE_BASE/DECISIONS.md) | Chronological log of 30 development decisions |
+| **Lessons Learned** | [KNOWLEDGE_BASE/LESSONS.md](KNOWLEDGE_BASE/LESSONS.md) | Issues found, fixes applied, patterns that worked |
+| **Agent Context Summaries** | [KNOWLEDGE_BASE/AGENTS.md](KNOWLEDGE_BASE/AGENTS.md) | What each agent type needs to know |
 
 ---
 
 ## 1. Project Overview
 
-**RideFlow** is a ride-hailing mobile application (Uber clone) built as a practical learning project following the "Practical Vibe Coding" methodology. Riders request rides, get matched with nearby drivers, track drivers in real-time, and pay via Stripe. Drivers accept rides, navigate to pickup, complete trips, and track earnings.
+**RideFlow** is a ride-hailing mobile application (Uber clone) built as a practical learning project following the "Practical Vibe Coding" methodology. Riders request rides, get matched with nearby drivers, track drivers in real-time, and pay via simulated Stripe. Drivers accept rides, navigate to pickup, complete trips, and track earnings.
 
 - **Project root:** `/home/fi/Documents/trae_projects/rideflow`
 - **Spec:** `UBER_CLONE_SPEC.md`
@@ -36,37 +54,44 @@
 | CSS Engine | tailwindcss | 3.4.17 | Utility-first CSS (NativeWind backend) |
 | Token Storage | expo-secure-store | 56.0.4 | Secure token caching for Clerk |
 
-**Backend (planned, not yet built):** Node.js + Express microservices, PostgreSQL 16 (Prisma), Redis 7, Socket.IO, BullMQ, Docker Compose.
+**Backend:** Node.js 20+ / Express 5.1 / Prisma 6.9 / PostgreSQL 16 / Socket.IO 4.8 / Zod 3.25 / bcryptjs / jsonwebtoken
 
 ---
 
-## 3. Architecture Decisions
+## 3. Project Statistics
 
-| Decision | Rationale |
-|----------|-----------|
-| Expo managed workflow | Fastest path to working app; no native build config needed |
-| NativeWind v5 | Write Tailwind classes directly in RN components; no StyleSheet boilerplate |
-| Zustand over Redux | Minimal API, no providers/boilerplate, works perfectly with TypeScript |
-| Clerk for auth | Drop-in OAuth + email auth; handles token refresh, session management |
-| react-native-maps (Google provider) | Best map quality; required for Places Autocomplete and Directions API |
-| Expo Router file-based routing | Convention over configuration; folder structure = navigation structure |
-| Axios with interceptors | Centralized error handling, auth token injection, timeout config |
-| Socket.IO for real-time | Auto-reconnection, room-based events, matches backend Socket.IO server |
-| Separate stores per domain | `useAuth`, `useLocation`, `useRide`, `useDriver` — each store is focused and testable |
-| `EXPO_PUBLIC_*` env vars | Only these are exposed to the client; secrets stay server-side |
-| Haversine for distance | Client-side straight-line distance without API calls; good enough for fare estimates |
-| expo-location geocoding | Built-in geocoding/reverse geocoding; no Places Autocomplete dependency needed |
-| Simulated ride lifecycle | Mock driver matching (3-5s), movement simulation (15% per tick), status auto-progression for demo |
-| Status-aware polylines | Different polyline colors/patterns per ride status (green=arriving, blue=in-progress, dashed=preview) |
-| Multi-step ride request | Search -> route preview -> ride type selection -> confirm; avoids overwhelming user |
-| Simulated payment flow | Card/wallet/cash selection with 1s processing delay; no real Stripe integration yet |
-| useHistory store with mock rides | 5 pre-populated rides with relative dates; addRide/getRideById for history + receipt lookup |
-| Receipt via URL params | receipt.tsx uses `useLocalSearchParams` to get ride ID; fetches from useHistory store by ID |
-| Profile folder routing | profile.tsx -> profile/index.tsx + profile/edit.tsx; folder-based routing for edit flow |
+| Metric | Count |
+|--------|-------|
+| Frontend source files (.ts/.tsx) | 42 |
+| Backend source files (.ts) | 12 |
+| Zustand stores | 5 |
+| Screens | 15 |
+| UI components | 5 |
+| Type definition files | 4 |
+| Library modules | 6 |
+| Backend services | 4 |
+| Database models | 6 |
+| Test files | 12 |
+| Milestones completed | 5/5 |
+| Frontend requirements verified | 48/48 |
+| TypeScript errors | 0 |
 
 ---
 
-## 4. Folder Structure
+## 4. Milestone Progress
+
+| Milestone | Requirements | Verified | Status |
+|-----------|-------------|----------|--------|
+| M1: Foundation | 31 | 31 | **COMPLETE** |
+| M2: Ride Booking | 6 | 6 | **COMPLETE** |
+| M3: Active Ride | 4 | 4 | **COMPLETE** |
+| M4: Driver Mode | 4 | 4 | **COMPLETE** |
+| M5: Payments & Polish | 3 | 3 | **COMPLETE** |
+| **Total** | **48** | **48** | **100% verified** |
+
+---
+
+## 5. Folder Structure
 
 ```
 rideflow/
@@ -80,356 +105,174 @@ rideflow/
     (rider)/                  # Rider tab group (Tabs navigator)
       _layout.tsx             # Rider Tabs layout (Home, History, Profile)
       index.tsx               # Home: map + "Where to?" search bar
-      history.tsx             # Ride history list with 5 mock rides, status badges, route display
+      history.tsx             # Ride history list with 5 mock rides
       profile/
         index.tsx             # Profile view + "Edit Profile" link + sign out
-        edit.tsx              # Profile editing: full name + phone number fields, save/cancel
+        edit.tsx              # Profile editing: full name + phone number fields
       ride/                   # Ride flow (hidden from tabs)
-        request.tsx           # Location search, route preview, ride type selection, fare estimate, confirm
+        request.tsx           # Location search, route preview, ride type selection
         matching.tsx          # Driver matching animation, cancel, mock driver assignment
-        active.tsx            # Active ride: map with driver tracking, status stepper, DriverInfoCard
-        payment.tsx           # Payment: fare summary, card/wallet/cash selection, simulated processing
+        active.tsx            # Active ride: map with driver tracking, status stepper
+        payment.tsx           # Payment: fare summary, card/wallet/cash selection
         complete.tsx          # Ride completion: star rating, comment, receipt view
-        receipt.tsx           # Historical receipt: route, driver, fare breakdown, status badge
+        receipt.tsx           # Historical receipt: route, driver, fare breakdown
     (driver)/                 # Driver tab group (Tabs navigator)
       _layout.tsx             # Driver Tabs layout (Dashboard, Earnings, Profile)
       index.tsx               # Dashboard: online toggle + stats
-      earnings.tsx            # Earnings history (placeholder)
+      earnings.tsx            # Earnings history (daily/weekly stats)
       profile.tsx             # Profile + sign out
       ride/                   # Driver ride flow (hidden from tabs)
-        incoming.tsx          # Incoming ride request (placeholder)
+        incoming.tsx          # Incoming ride request (15s countdown, accept/reject)
+        active.tsx            # Driver active ride (navigate -> arrive -> complete)
   components/
     ui/                       # Reusable UI primitives
       Button.tsx              # 4 variants: primary, secondary, danger, ghost
       Card.tsx                # White card with border and rounded corners
       LoadingSpinner.tsx      # Centered ActivityIndicator with optional message
     map/
-      RideMap.tsx             # Google Map with markers, polylines, driver tracking, crosshair button
+      RideMap.tsx             # Google Map with markers, polylines, driver tracking
     ride/
-      DriverInfoCard.tsx      # Driver avatar, star rating, vehicle info, call/message buttons
+      DriverInfoCard.tsx      # Driver avatar, star rating, vehicle info, call/message
   lib/
     api.ts                    # Axios instance (baseURL from constants, auth interceptor stub)
     clerk.ts                  # ClerkProvider, tokenCache (expo-secure-store), publishableKey
-    constants.ts              # API_URL, RIDE_TYPES, fare constants (BASE_FARE, PER_KM_RATE, PER_MINUTE_RATE), COLORS
-    location.ts               # getCurrentLocation, reverseGeocode, geocodeSearch, haversineDistance, formatDistance, estimateDurationMinutes, getRegionForCoordinates
+    constants.ts              # API_URL, RIDE_TYPES, fare constants, COLORS
+    location.ts               # getCurrentLocation, reverseGeocode, geocodeSearch, haversineDistance
     socket.ts                 # Socket.IO singleton (getSocket, connectSocket, disconnectSocket)
     useAuth.ts                # Auth guard hook (redirect logic based on Clerk state)
   store/
-    useAuth.ts                # User state: user, isSignedIn, setRole, signOut
+    useAuth.ts                # User state: user, isSignedIn, setRole, updateProfile, signOut
     useLocation.ts            # Location state: currentLocation, pickup, destination
-    useRide.ts                # Ride state: currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, updateDriverLocation, submitRating, clearRide
-    useDriver.ts              # Driver mode state: isOnline, todayEarnings, todayRides, incomingRideId
+    useRide.ts                # Ride state: currentRide, driver, fareEstimates, matching, payment
+    useDriver.ts              # Driver mode state: isOnline, todayEarnings, goOnline/goOffline
+    useHistory.ts             # Ride history: rides array with 5 mock rides
   types/
-    ride.ts                   # Ride, RideStatus, RideType, Location, FareEstimate, DriverInfo, PaymentMethod, RideRating
+    ride.ts                   # Ride, RideStatus, RideType, Location, FareEstimate, DriverInfo
     user.ts                   # User, UserRole, DriverProfile
     api.ts                    # ApiResponse<T>, ApiError, PaginatedResponse<T>
     declarations.d.ts         # CSS module type declaration
-  assets/
-    images/                   # App icons, splash screen, favicon
-  global.css                  # Tailwind base/components/utilities imports
-  tailwind.config.js          # Custom colors (primary, accent, success, danger), Inter font family
+  __tests__/                  # Vitest tests
+    components/               # Component tests (Button, Card, DriverInfoCard, LoadingSpinner)
+    lib/                      # Lib tests (constants, location)
+    store/                    # Store tests (useAuth, useDriver, useHistory, useLocation, useRide)
+    __mocks__/                # React Native mock + render helper
+  backend/
+    src/
+      gateway.ts              # Express API gateway + Socket.IO
+      services/
+        auth.ts               # Auth endpoints (register, login, me, profile)
+        ride.ts               # Ride endpoints (create, get, status, history, cancel, rate)
+        matching.ts           # Matching endpoints (find-driver, accept, reject, location)
+        payment.ts            # Payment endpoints (process, history, get)
+        notification.ts       # Socket.IO setup + event handlers
+      middleware/
+        auth.ts               # JWT authenticate + requireRole
+        errorHandler.ts       # Global error handler
+      utils/
+        errors.ts             # Error classes (AppError, NotFound, etc.)
+        fare.ts               # Fare calculation + haversine + surge pricing
+        jwt.ts                # JWT sign/verify/extract
+        prisma.ts             # Prisma client singleton
+    prisma/
+      seed.ts                 # Database seed (2 riders, 3 drivers, 3 rides)
+    package.json              # Backend dependencies
+  KNOWLEDGE_BASE/             # Split wiki files (this directory)
+  tailwind.config.js          # Custom colors + Inter font family
   babel.config.js             # expo preset + nativewind/babel + reanimated plugin
   metro.config.js             # Expo metro config wrapped with NativeWind
-  nativewind-env.d.ts         # NativeWind TypeScript types
+  vitest.config.ts            # Vitest config: jsdom, react-native mock, v8 coverage
   tsconfig.json               # Extends expo/tsconfig.base, strict mode
   app.json                    # Expo config (name, icons, plugins)
-  AGENTS.md                   # Agent instructions for building the project
-  UBER_CLONE_SPEC.md          # Full implementation specification
-  RTM.md                      # Requirements Traceability Matrix
-  CHANGELOG.md                # Release history
+  package.json                # Frontend dependencies
 ```
 
 ---
 
-## 5. Conventions
+## 6. Conventions
 
 ### Styling
 - **ALL styling via NativeWind `className` props** — no `StyleSheet.create` unless NativeWind cannot achieve the effect.
-- **SafeAreaView workaround:** Use `<View className="flex-1 bg-white">` instead of SafeAreaView with className (NativeWind limitation).
+- **SafeAreaView workaround:** Use `<View className="flex-1 bg-white">` instead of SafeAreaView with className.
 - **Color palette:** Primary = black/white, Accent = blue-500, Success = green-500, Danger = red-500, Neutral = gray-100/gray-500.
-- **Font:** Inter family (inter, inter-bold, inter-semibold, inter-medium, inter-light) defined in tailwind.config.js.
+- **Font:** Inter family defined in tailwind.config.js.
 - **Rounded elements:** `rounded-full` for buttons/pills, `rounded-2xl` for cards.
 - **Map-first design:** Map takes full screen; UI overlays use absolute positioning or bottom panels.
 
 ### Code Patterns
-- **State management:** One Zustand store per domain (auth, location, ride, driver). No middleware yet (AsyncStorage persistence planned for future).
-- **Auth flow:** Clerk handles authentication; `useAuth()` hook in `lib/useAuth.ts` handles route protection via `useSegments` + `useEffect`.
+- **State management:** One Zustand store per domain. No middleware yet.
+- **Auth flow:** Clerk handles authentication; `useAuth()` in `lib/useAuth.ts` handles route protection.
 - **Component structure:** Functional components with hooks. Props defined as interfaces above the component.
-- **Navigation:** Expo Router file-based. Route groups in parentheses `(auth)`, `(rider)`, `(driver)`. Hidden routes use `href: null` in Tabs.Screen options.
+- **Navigation:** Expo Router file-based. Route groups in parentheses `(auth)`, `(rider)`, `(driver)`.
 - **Naming:** PascalCase for components/files, camelCase for functions/variables, UPPER_SNAKE for constants.
-- **Imports:** Absolute imports not configured; use relative paths (e.g., `../../store/useLocation`).
+- **Imports:** Relative paths (e.g., `../../store/useLocation`).
 
-### Prompt Structure (for AI agents)
-Every prompt must follow the 4-part structure:
-1. "Read the AGENTS.md file first and follow it strictly."
-2. ONE task — what to build right now
-3. Constraints — what already works that must not change
-4. Optional — design reference or documentation
-
----
-
-## 6. Current State
-
-### Milestone Progress
-
-| Milestone | Requirements | Verified | Status |
-|-----------|-------------|----------|--------|
-| M1: Foundation | 31 | 31 | **COMPLETE** |
-| M2: Ride Booking | 6 | 6 | **COMPLETE** |
-| M3: Active Ride | 4 | 4 | **COMPLETE** |
-| M4: Driver Mode | 4 | 4 | **COMPLETE** |
-| M5: Payments & Polish | 3 | 3 | **COMPLETE** |
-| **Total** | **48** | **48** | **100% verified** |
-
-### Final Project Statistics
-| Metric | Count |
-|--------|-------|
-| Source files (.ts/.tsx) | 42 |
-| Zustand stores | 5 |
-| Screens | 15 |
-| UI components | 3 |
-| Map/ride components | 2 |
-| Type definition files | 4 |
-| Library modules | 6 |
-| Milestones completed | 5/5 |
-| Requirements verified | 48/48 |
-
-### M1 Completion Summary (31/31 verified on 2026-05-27)
-All foundation requirements verified in a single session across three task groups:
-- **TASK-1.1:** Project scaffolding, NativeWind, Expo Router, types, stores, API client, UI components (REQ-1.1 through REQ-1.8, REQ-1.19)
-- **TASK-1.2:** Clerk authentication — onboarding, login, register, role selection, auth guard (REQ-1.9 through REQ-1.12, REQ-1.20 through REQ-1.25)
-- **TASK-1.3:** Rider home screen with map, location permissions, current location marker, "Where to?" bar (REQ-1.13 through REQ-1.18, REQ-1.26 through REQ-1.30)
-
-### M2 Completion Summary (6/6 verified on 2026-05-28)
-Full ride booking flow implemented across five task groups:
-- **TASK-6 (REQ-2.3):** Route polyline display using `react-native-maps` Polyline, haversine distance calculation, formatDistance helper
-- **TASK-7 (REQ-2.4, REQ-2.5):** Ride type selection cards (Standard/Comfort/Premium) with fare calculation using BASE_FARE + PER_KM_RATE * multiplier + PER_MINUTE_RATE
-- **TASK-8 (REQ-2.1):** Google Maps integration — RideMap component with PROVIDER_GOOGLE, auto-fit region, crosshair "my location" button
-- **TASK-9 (REQ-2.2):** Location search using expo-location geocodeAsync + reverseGeocodeAsync (geocodeSearch helper with timeout and limit)
-- **TASK-10 (REQ-2.6):** Ride request + matching flow — request.tsx multi-step (search -> preview -> ride type -> confirm), matching.tsx with pulsing animation and mock driver assignment
-
-### M3 Completion Summary (4/4 verified on 2026-05-28)
-Active ride experience implemented across four task groups:
-- **TASK-11 (REQ-3.1):** Real-time driver location tracking — simulated driver movement (15% per tick toward target every 2s), driver marker on map, updateDriverLocation store action
-- **TASK-12 (REQ-3.2):** Driver info card component — avatar, star rating (half-star support), ride count, vehicle details, license plate, call/message action buttons
-- **TASK-13 (REQ-3.4):** Ride completion + rating — 5-star rating with labels (Terrible/Good/Excellent), optional comment, receipt view with route/driver/fare/rating summary
-- **TASK-14 (REQ-3.3):** Status-aware polylines — green (driver_arriving: driver to pickup), blue (in_progress: pickup to destination), dashed blue (preview: no active ride)
-
-### M4 Completion Summary (4/4 verified on 2026-05-28)
-Driver mode experience implemented across four task groups:
-- **TASK-15 (REQ-4.3):** Accept/reject ride flow — incoming.tsx with 15-second countdown timer, ride details display, accept navigates to driver active ride, reject returns to dashboard
-- **TASK-16 (REQ-4.2):** Incoming ride request with countdown — animated timer, pickup/destination details, fare estimate, rider info preview
-- **TASK-17 (REQ-4.1):** Driver online/offline toggle with map — goOnline/goOffline actions, RideMap integration, dashboard stats (earnings, rides, rating)
-- **TASK-18 (REQ-4.4):** Driver ride lifecycle — active.tsx with navigate->arrive->complete flow, status stepper, trip completion screen
-
-### M5 Completion Summary (3/3 verified on 2026-05-28)
-Payment flow, ride history, and profile editing implemented across three task groups:
-- **TASK-19 (REQ-5.3):** Profile editing — `app/(rider)/profile/edit.tsx` with full name and phone number fields, validation (name required), avatar initial display, save/cancel actions. `updateProfile` action added to `useAuth` store
-- **TASK-20 (REQ-5.2):** Ride history with receipts — `app/(rider)/history.tsx` with FlatList of 5 mock rides (4 completed, 1 cancelled), status badges, route display, fare, date formatting. `app/(rider)/ride/receipt.tsx` with full receipt detail: route, ride type, driver info, fare breakdown (base + distance + time + adjustment), status badge. `useHistory` store with MOCK_RIDES data
-- **TASK-21 (REQ-5.1):** Simulated payment flow — `app/(rider)/ride/payment.tsx` with payment method selector (card/wallet/cash), fare summary card, simulated card details (****4242), 1-second processing animation, PaymentMethod type added to types/ride.ts, `paymentMethod`/`setPaymentMethod` added to useRide store
-
-### TypeScript Status
-- `npx tsc --noEmit` passes with **zero errors** (verified 2026-05-28).
-
-### Git Status
-- Single commit: `3aa962d Initial commit` on branch `master`.
-- Working tree has uncommitted changes (new files from M1-M5 work).
+### Backend Patterns
+- **Validation:** Zod schemas for all request bodies.
+- **Error handling:** Custom error classes (AppError hierarchy) caught by global errorHandler middleware.
+- **Authentication:** JWT with 7-day expiry. Token in Authorization header.
+- **Authorization:** requireRole middleware checks user.role against allowed roles.
+- **Real-time:** Socket.IO rooms for user/rider/driver/ride-specific events.
 
 ---
 
-## 7. Key Files
+## 7. Environment Variables
 
-### Configuration (must not change without careful consideration)
-| File | Purpose |
-|------|---------|
-| `AGENTS.md` | Agent behavior rules, folder structure, styling rules, constraints |
-| `UBER_CLONE_SPEC.md` | Full spec: architecture, DB schema, API endpoints, Socket.IO events |
-| `RTM.md` | Requirements traceability — tracks all 48 requirements across 5 milestones |
-| `tailwind.config.js` | Custom color tokens + Inter font family |
-| `babel.config.js` | NativeWind + Reanimated babel plugins |
-| `metro.config.js` | NativeWind metro integration |
-| `app.json` | Expo app config (icons, plugins, orientation) |
-| `package.json` | Dependencies and scripts |
+### Client-side (EXPO_PUBLIC_*)
 
-### Core Architecture
-| File | Purpose |
-|------|---------|
-| `app/_layout.tsx` | Root layout — imports global.css, wraps app in ClerkProvider, defines Stack |
-| `lib/useAuth.ts` | Auth guard — redirects unauthenticated users to (auth), signed-in users to (rider) |
-| `lib/clerk.ts` | Clerk config — publishableKey from env, tokenCache via expo-secure-store |
-| `lib/constants.ts` | API_URL, RIDE_TYPES array, fare rate constants (BASE_FARE, PER_KM_RATE, PER_MINUTE_RATE), COLORS object |
-| `lib/api.ts` | Axios instance with base URL, auth token interceptor (TODO), error interceptor |
-| `lib/location.ts` | Location helpers: getCurrentLocation, reverseGeocode, geocodeSearch, haversineDistance, formatDistance, estimateDurationMinutes, getRegionForCoordinates |
-| `lib/socket.ts` | Socket.IO singleton: getSocket, connectSocket(userId), disconnectSocket |
-
-### State Management
-| File | Purpose |
-|------|---------|
-| `store/useAuth.ts` | User auth state (user, isSignedIn, setRole, updateProfile, signOut) |
-| `store/useLocation.ts` | Location state (currentLocation, pickup, destination) |
-| `store/useRide.ts` | Ride state (currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, paymentMethod, setPaymentMethod, updateDriverLocation, submitRating, clearRide) |
-| `store/useDriver.ts` | Driver mode state (isOnline, todayEarnings, todayRides, incomingRideId) |
-| `store/useHistory.ts` | Ride history state (rides, addRide, getRideById) with 5 mock rides |
-
-### UI Components
-| File | Purpose |
-|------|---------|
-| `components/ui/Button.tsx` | Reusable button with 4 variants (primary, secondary, danger, ghost) |
-| `components/ui/Card.tsx` | White card container with border |
-| `components/ui/LoadingSpinner.tsx` | Centered loading indicator with message |
-| `components/map/RideMap.tsx` | Google Map with markers (pickup/destination/driver), status-aware polylines, auto-fit region, crosshair button |
-| `components/ride/DriverInfoCard.tsx` | Driver avatar, star rating (half-star support), vehicle details, license plate, call/message buttons |
-
-### Screens (all implemented)
-| File | Purpose |
-|------|---------|
-| `app/(auth)/index.tsx` | Onboarding — logo, tagline, "Get Started" + "I already have an account" |
-| `app/(auth)/login.tsx` | Login — email/password with Clerk useSignIn |
-| `app/(auth)/register.tsx` | Register — name/email/password + rider/driver role selection |
-| `app/(rider)/index.tsx` | Rider home — full-screen map + "Where to?" bar + current location |
-| `app/(rider)/history.tsx` | Ride history list — 5 mock rides, status badges, route display, tap for receipt |
-| `app/(rider)/profile/index.tsx` | Rider profile — avatar, menu items, "Edit Profile" link, sign out |
-| `app/(rider)/profile/edit.tsx` | Profile editing — full name + phone number fields, validation, save/cancel |
-| `app/(rider)/ride/request.tsx` | Multi-step ride request: location search -> route preview -> ride type selection -> confirm |
-| `app/(rider)/ride/matching.tsx` | Driver matching: pulsing animation, cancel, mock driver assignment (3-5s), driver info reveal |
-| `app/(rider)/ride/active.tsx` | Active ride: map with driver tracking, status stepper (4 steps), DriverInfoCard, auto-progression simulation |
-| `app/(rider)/ride/payment.tsx` | Payment: fare summary card, card/wallet/cash selector, simulated card details, 1s processing |
-| `app/(rider)/ride/complete.tsx` | Ride completion: 5-star rating with labels, optional comment, receipt view with route/driver/fare summary |
-| `app/(rider)/ride/receipt.tsx` | Historical receipt: route, ride type, driver info, fare breakdown, status badge |
-| `app/(driver)/index.tsx` | Driver dashboard — online toggle + earnings/rides/rating stats |
-| `app/(driver)/profile.tsx` | Driver profile — avatar, menu items, sign out |
-| `app/(driver)/ride/incoming.tsx` | Incoming ride request — 15s countdown, ride details, accept/reject |
-| `app/(driver)/ride/active.tsx` | Driver active ride — navigate -> arrive -> complete lifecycle |
-| `app/(driver)/earnings.tsx` | Earnings history — daily/weekly stats |
-
----
-
-## 8. Dependencies
-
-### Production Dependencies
-| Package | Role |
-|---------|------|
-| `@clerk/clerk-expo` | Authentication SDK (email, OAuth, session management) |
-| `axios` | HTTP client with interceptors for API calls |
-| `expo` | Core Expo SDK (managed workflow runtime) |
-| `expo-constants` | Access to app constants and config |
-| `expo-linking` | Deep linking support |
-| `expo-location` | GPS access, geocoding, reverse geocoding |
-| `expo-router` | File-based routing for Expo apps |
-| `expo-secure-store` | Encrypted key-value storage (Clerk token cache) |
-| `expo-status-bar` | Status bar styling control |
-| `nativewind` | Tailwind CSS for React Native (className props) |
-| `react` | Core React (v19.2.3) |
-| `react-native` | Core React Native (v0.85.3) |
-| `react-native-gesture-handler` | Native touch gesture handling |
-| `react-native-maps` | Google Maps / Apple Maps component |
-| `react-native-reanimated` | High-performance UI thread animations |
-| `react-native-safe-area-context` | Safe area insets for notched devices |
-| `react-native-screens` | Native screen containers for navigation |
-| `socket.io-client` | Real-time WebSocket communication |
-| `tailwindcss` | Utility-first CSS engine (NativeWind backend) |
-| `zustand` | Lightweight state management |
-
-### Dev Dependencies
-| Package | Role |
-|---------|------|
-| `@types/react` | TypeScript types for React |
-| `typescript` | TypeScript compiler (strict mode) |
-
-### Not Yet Installed (planned for future milestones)
-| Package | Milestone | Purpose |
-|---------|-----------|---------|
-| `@stripe/stripe-react-native` | Backend integration | Real payment processing (M5 uses simulated payments) |
-
----
-
-## 9. Environment Variables
-
-### Client-side (EXPO_PUBLIC_* — bundled in app)
 | Variable | Purpose | Required For |
 |----------|---------|-------------|
-| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk SDK authentication | Auth flow (M1) |
-| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps SDK rendering | Map display (M1/M2) |
-| `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe SDK initialization | Payments (M5) |
+| `EXPO_PUBLIC_CLERK_PUBLISHABLE_KEY` | Clerk SDK authentication | Auth flow |
+| `EXPO_PUBLIC_GOOGLE_MAPS_API_KEY` | Google Maps SDK rendering | Map display |
+| `EXPO_PUBLIC_STRIPE_PUBLISHABLE_KEY` | Stripe SDK initialization | Payments (future) |
 | `EXPO_PUBLIC_API_URL` | Backend API base URL | API calls (default: `http://localhost:3000`) |
-| `EXPO_PUBLIC_APP_NAME` | App display name | General |
 
 ### Server-side (never exposed to client)
+
 | Variable | Purpose | Required For |
 |----------|---------|-------------|
-| `CLERK_SECRET_KEY` | Clerk admin API | Backend auth verification |
-| `GOOGLE_MAPS_SERVER_KEY` | Google Maps server-side API | Directions, Distance Matrix |
-| `STRIPE_SECRET_KEY` | Stripe payment processing | Backend payments |
-| `STRIPE_WEBHOOK_SECRET` | Stripe webhook verification | Payment webhooks |
+| `JWT_SECRET` | JWT signing secret | Backend auth |
 | `DATABASE_URL` | PostgreSQL connection string | Backend database |
-| `REDIS_URL` | Redis connection string | Backend caching/pub-sub |
-
-### Setup
-1. Copy `.env.example` to `.env.local` (not tracked in git)
-2. Get Clerk key from [dashboard.clerk.com](https://dashboard.clerk.com)
-3. Get Google Maps key from [console.cloud.google.com](https://console.cloud.google.com) (enable Maps SDK for Android/iOS, Places API, Directions API)
-4. Stripe keys from [dashboard.stripe.com](https://dashboard.stripe.com) (M5)
+| `CLERK_SECRET_KEY` | Clerk admin API | Backend auth verification |
+| `STRIPE_SECRET_KEY` | Stripe payment processing | Backend payments |
+| `PORT` | Server port | Backend (default: 3000) |
+| `CORS_ORIGIN` | Allowed CORS origins | Backend (default: localhost:5173,8000,19006) |
 
 ---
 
-## 10. Lessons Learned
+## 8. Key Commands
 
-### NativeWind v5 + Expo Setup Quirks
-- **SafeAreaView + className:** NativeWind `className` prop does NOT work on `react-native-safe-area-context` SafeAreaView. Workaround: use `<View className="flex-1 bg-white">` with `<StatusBar style="dark" />` inside.
-- **CSS type declarations:** Need `types/declarations.d.ts` with `declare module "*.css"` to avoid TypeScript errors on CSS imports.
-- **Babel config:** Must include both `babel-preset-expo` with `jsxImportSource: "nativewind"` AND `"nativewind/babel"` preset.
-- **Metro config:** Must wrap Expo's default metro config with `withNativeWind(config, { input: "./global.css" })`.
-- **Reanimated plugin:** Must be last in babel plugins array: `["react-native-reanimated/plugin"]`.
+### Frontend
 
-### Auth Flow Architecture
-- Clerk's `useAuth` hook name conflicts with the project's custom auth guard. Solution: project imports Clerk as `useClerkAuth` (aliased in `lib/clerk.ts`), and the custom `useAuth()` in `lib/useAuth.ts` wraps it with route protection logic.
-- Auth guard uses `useSegments()` to detect if user is in `(auth)` group, then redirects accordingly.
-- Role-based routing (rider vs driver) is stored in Clerk's `unsafeMetadata` during registration. The auth guard currently always redirects to `(rider)` — role-based redirect is a TODO.
+```bash
+# From project root
+npx expo start              # Start Expo dev server
+npx tsc --noEmit            # TypeScript check (must pass with 0 errors)
+npx vitest run              # Run all tests
+npx vitest --watch          # Watch mode
+npx vitest --coverage       # With coverage report
+```
 
-### TypeScript
-- Extends `expo/tsconfig.base` with `strict: true` — all code must pass strict type checking.
-- `npx tsc --noEmit` is the verification command (no emit, just type check).
+### Backend
 
-### Map Integration
-- `react-native-maps` uses `PROVIDER_GOOGLE` for Google Maps rendering.
-- Default region falls back to San Francisco (37.7749, -122.4194) if no location available.
-- `getRegionForCoordinates()` helper in `lib/location.ts` computes a bounding region for multiple coordinates with padding.
+```bash
+# From backend/
+npm run dev                 # Start dev server with tsx
+npm run build               # Compile TypeScript
+npm run start               # Start production server
+npm run db:generate         # Generate Prisma client
+npm run db:push             # Push schema to database
+npm run db:migrate          # Create migration
+npm run db:seed             # Seed database with test data
+npm run db:reset            # Reset + reseed database
+npm run typecheck           # TypeScript check
+```
 
-### Development Workflow
-- **Practical Vibe Coding:** One feature at a time, verify it works, then move on.
-- **Prompt structure:** Always 4 parts — Read AGENTS.md, one task, constraints, optional reference.
-- **Verification checklist:** TypeScript passes, no console errors, existing features still work.
-- **No library installs without approval:** Prevents dependency bloat and breaking changes.
+---
 
-### Ride Booking Flow (M2)
-- **Multi-step request pattern:** request.tsx uses internal state (showRideTypes) to switch between search -> preview -> ride type selection without extra routes. Keeps all booking logic in one screen.
-- **Geocoding approach:** expo-location's geocodeAsync + reverseGeocodeAsync is sufficient for place search. No need for Google Places Autocomplete dependency. geocodeSearch() helper with timeout and limit handles the flow.
-- **Fare calculation:** Client-side using haversine distance (straight-line) * PER_KM_RATE * multiplier + estimated minutes * PER_MINUTE_RATE + BASE_FARE. Good enough for UI; real pricing would come from backend.
-- **Mock matching:** matching.tsx simulates driver search with 3-5s random delay, then assigns a hardcoded mock driver. This pattern allows testing the full flow without backend.
+## 9. Quick Links
 
-### Active Ride (M3)
-- **Driver movement simulation:** Uses setInterval with 15% interpolation per tick (every 2s) toward target. Position snaps when within 0.00005 degrees. Simple but effective for demo.
-- **Status auto-progression:** active.tsx uses setTimeout chain (3s -> 8s -> 15s) to advance through matched -> driver_arriving -> in_progress -> completed. Final fare gets random +/- $1 variation from estimate.
-- **Status-aware polylines:** RideMap accepts rideStatus prop and renders different polylines: green for driver_arriving (driver->pickup), blue for in_progress (pickup->destination), dashed blue for preview (no active ride).
-- **DriverInfoCard reuse:** Standalone component used in both matching.tsx (inline version) and active.tsx (full version with call/message buttons). Extracting it early paid off.
-- **Rating UI pattern:** complete.tsx uses conditional rendering (rating form vs receipt) based on submitted state. Star rating uses RATING_LABELS lookup for accessible text feedback.
-
-### Driver Mode (M4)
-- **Incoming ride countdown pattern:** incoming.tsx uses a 15-second countdown timer with visual progress indicator. Accept navigates to driver active ride; reject returns to dashboard. Simple but effective for demo.
-- **Driver lifecycle simulation:** active.tsx simulates the driver ride lifecycle (navigate to pickup -> arrive -> start trip -> complete) using timed status transitions.
-- **Online/offline toggle:** Driver dashboard toggles between online (map visible, ready for rides) and offline (stats summary) states.
-
-### Payments & Polish (M5)
-- **Payment method selector:** payment.tsx uses a radio-button pattern with card/wallet/cash options. Card method shows simulated card details (****4242). Processing uses 1-second setTimeout to simulate payment.
-- **Ride history with mock data:** useHistory store pre-populated with 5 realistic mock rides (4 completed, 1 cancelled) with relative dates (1/3/5/7/10 days ago). FlatList with pull-to-refresh-ready structure.
-- **Receipt detail pattern:** receipt.tsx receives ride ID via useLocalSearchParams, fetches from useHistory store by ID. Shows full fare breakdown (base + distance + time + adjustment) for completed rides.
-- **Profile editing:** edit.tsx uses local state initialized from useAuth store. updateProfile action merges updates into existing user. Validation requires non-empty full name.
-- **Profile screen refactoring:** profile.tsx split into profile/index.tsx + profile/edit.tsx using folder-based routing. "Edit Profile" menu item navigates to /profile/edit.
-
-### Known TODOs in Codebase
-- `lib/api.ts`: Auth token injection in request interceptor (needs Clerk token integration)
-- `lib/useAuth.ts`: Role-based redirect (rider vs driver) after login
-- `app/(rider)/index.tsx`: Navigate to actual location search screen (currently goes to request.tsx)
-- All screens use mock data — backend integration needed for real matching, payment, history
-- `@stripe/stripe-react-native`: Install for real payment processing (currently simulated)
-- Driver earnings screen: placeholder — needs real earnings data from backend
+- **Spec:** `UBER_CLONE_SPEC.md`
+- **Agent instructions:** `AGENTS.md`
+- **Requirements traceability:** `RTM.md`
+- **Changelog:** `CHANGELOG.md`
+- **Full wiki index:** `KNOWLEDGE_BASE/INDEX.md`
