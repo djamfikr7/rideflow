@@ -240,7 +240,7 @@ Active ride experience implemented across four task groups:
 |------|---------|
 | `store/useAuth.ts` | User auth state (user, isSignedIn, setRole, signOut) |
 | `store/useLocation.ts` | Location state (currentLocation, pickup, destination) |
-| `store/useRide.ts` | Ride state (currentRide, driver, fareEstimates, selectedRideType, isMatching) |
+| `store/useRide.ts` | Ride state (currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, updateDriverLocation, submitRating, clearRide) |
 | `store/useDriver.ts` | Driver mode state (isOnline, todayEarnings, todayRides, incomingRideId) |
 
 ### UI Components
@@ -249,7 +249,8 @@ Active ride experience implemented across four task groups:
 | `components/ui/Button.tsx` | Reusable button with 4 variants (primary, secondary, danger, ghost) |
 | `components/ui/Card.tsx` | White card container with border |
 | `components/ui/LoadingSpinner.tsx` | Centered loading indicator with message |
-| `components/map/RideMap.tsx` | Google Map with pickup/destination markers, auto-centers on current location |
+| `components/map/RideMap.tsx` | Google Map with markers (pickup/destination/driver), status-aware polylines, auto-fit region, crosshair button |
+| `components/ride/DriverInfoCard.tsx` | Driver avatar, star rating (half-star support), vehicle details, license plate, call/message buttons |
 
 ### Screens (working)
 | File | Purpose |
@@ -259,13 +260,16 @@ Active ride experience implemented across four task groups:
 | `app/(auth)/register.tsx` | Register — name/email/password + rider/driver role selection |
 | `app/(rider)/index.tsx` | Rider home — full-screen map + "Where to?" bar + current location |
 | `app/(rider)/profile.tsx` | Rider profile — avatar, menu items, sign out |
+| `app/(rider)/ride/request.tsx` | Multi-step ride request: location search -> route preview -> ride type selection -> confirm |
+| `app/(rider)/ride/matching.tsx` | Driver matching: pulsing animation, cancel, mock driver assignment (3-5s), driver info reveal |
+| `app/(rider)/ride/active.tsx` | Active ride: map with driver tracking, status stepper (4 steps), DriverInfoCard, auto-progression simulation |
+| `app/(rider)/ride/complete.tsx` | Ride completion: 5-star rating with labels, optional comment, receipt view with route/driver/fare summary |
 | `app/(driver)/index.tsx` | Driver dashboard — online toggle + earnings/rides/rating stats |
 | `app/(driver)/profile.tsx` | Driver profile — avatar, menu items, sign out |
 
 ### Screens (placeholder — need implementation)
 | File | Current State | Next Milestone |
 |------|--------------|----------------|
-| `app/(rider)/ride/request.tsx` | Placeholder text | M2 — ride type selection + fare estimate |
 | `app/(rider)/history.tsx` | Placeholder text | M5 — ride history list |
 | `app/(driver)/earnings.tsx` | Placeholder text | M5 — earnings history |
 | `app/(driver)/ride/incoming.tsx` | Placeholder text | M4 — incoming ride request UI |
