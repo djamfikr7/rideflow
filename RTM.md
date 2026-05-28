@@ -96,6 +96,6 @@
 | M1: Foundation | 31 | 31 | 0 | 0 |
 | M2: Ride Booking | 6 | 6 | 0 | 0 |
 | M3: Active Ride | 4 | 4 | 0 | 0 |
-| M4: Driver Mode | 4 | 0 | 0 | 4 |
+| M4: Driver Mode | 4 | 4 | 0 | 0 |
 | M5: Payments | 3 | 0 | 0 | 3 |
-| **TOTAL** | **48** | **41** | **0** | **7** |
+| **TOTAL** | **48** | **45** | **0** | **3** |
