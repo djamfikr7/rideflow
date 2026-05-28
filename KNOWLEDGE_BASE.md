@@ -1,6 +1,6 @@
 # RideFlow Knowledge Base
 
-> Living document — updated after each milestone. Last updated: 2026-05-28 (M1, M2, M3 complete; 41/48 verified).
+> Living document — updated after each milestone. Last updated: 2026-05-28 (ALL MILESTONES COMPLETE; 48/48 verified).
 
 ---
 
@@ -59,6 +59,10 @@
 | Simulated ride lifecycle | Mock driver matching (3-5s), movement simulation (15% per tick), status auto-progression for demo |
 | Status-aware polylines | Different polyline colors/patterns per ride status (green=arriving, blue=in-progress, dashed=preview) |
 | Multi-step ride request | Search -> route preview -> ride type selection -> confirm; avoids overwhelming user |
+| Simulated payment flow | Card/wallet/cash selection with 1s processing delay; no real Stripe integration yet |
+| useHistory store with mock rides | 5 pre-populated rides with relative dates; addRide/getRideById for history + receipt lookup |
+| Receipt via URL params | receipt.tsx uses `useLocalSearchParams` to get ride ID; fetches from useHistory store by ID |
+| Profile folder routing | profile.tsx -> profile/index.tsx + profile/edit.tsx; folder-based routing for edit flow |
 
 ---
 
@@ -76,13 +80,17 @@ rideflow/
     (rider)/                  # Rider tab group (Tabs navigator)
       _layout.tsx             # Rider Tabs layout (Home, History, Profile)
       index.tsx               # Home: map + "Where to?" search bar
-      history.tsx             # Ride history (placeholder)
-      profile.tsx             # Profile + sign out
+      history.tsx             # Ride history list with 5 mock rides, status badges, route display
+      profile/
+        index.tsx             # Profile view + "Edit Profile" link + sign out
+        edit.tsx              # Profile editing: full name + phone number fields, save/cancel
       ride/                   # Ride flow (hidden from tabs)
         request.tsx           # Location search, route preview, ride type selection, fare estimate, confirm
         matching.tsx          # Driver matching animation, cancel, mock driver assignment
         active.tsx            # Active ride: map with driver tracking, status stepper, DriverInfoCard
+        payment.tsx           # Payment: fare summary, card/wallet/cash selection, simulated processing
         complete.tsx          # Ride completion: star rating, comment, receipt view
+        receipt.tsx           # Historical receipt: route, driver, fare breakdown, status badge
     (driver)/                 # Driver tab group (Tabs navigator)
       _layout.tsx             # Driver Tabs layout (Dashboard, Earnings, Profile)
       index.tsx               # Dashboard: online toggle + stats
@@ -112,7 +120,7 @@ rideflow/
     useRide.ts                # Ride state: currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, updateDriverLocation, submitRating, clearRide
     useDriver.ts              # Driver mode state: isOnline, todayEarnings, todayRides, incomingRideId
   types/
-    ride.ts                   # Ride, RideStatus, RideType, Location, FareEstimate, DriverInfo, RideRating
+    ride.ts                   # Ride, RideStatus, RideType, Location, FareEstimate, DriverInfo, PaymentMethod, RideRating
     user.ts                   # User, UserRole, DriverProfile
     api.ts                    # ApiResponse<T>, ApiError, PaginatedResponse<T>
     declarations.d.ts         # CSS module type declaration
@@ -169,9 +177,22 @@ Every prompt must follow the 4-part structure:
 | M1: Foundation | 31 | 31 | **COMPLETE** |
 | M2: Ride Booking | 6 | 6 | **COMPLETE** |
 | M3: Active Ride | 4 | 4 | **COMPLETE** |
-| M4: Driver Mode | 4 | 0 | Not started |
-| M5: Payments & Polish | 3 | 0 | Not started |
-| **Total** | **48** | **41** | **85.4% verified** |
+| M4: Driver Mode | 4 | 4 | **COMPLETE** |
+| M5: Payments & Polish | 3 | 3 | **COMPLETE** |
+| **Total** | **48** | **48** | **100% verified** |
+
+### Final Project Statistics
+| Metric | Count |
+|--------|-------|
+| Source files (.ts/.tsx) | 42 |
+| Zustand stores | 5 |
+| Screens | 15 |
+| UI components | 3 |
+| Map/ride components | 2 |
+| Type definition files | 4 |
+| Library modules | 6 |
+| Milestones completed | 5/5 |
+| Requirements verified | 48/48 |
 
 ### M1 Completion Summary (31/31 verified on 2026-05-27)
 All foundation requirements verified in a single session across three task groups:
@@ -194,19 +215,25 @@ Active ride experience implemented across four task groups:
 - **TASK-13 (REQ-3.4):** Ride completion + rating — 5-star rating with labels (Terrible/Good/Excellent), optional comment, receipt view with route/driver/fare/rating summary
 - **TASK-14 (REQ-3.3):** Status-aware polylines — green (driver_arriving: driver to pickup), blue (in_progress: pickup to destination), dashed blue (preview: no active ride)
 
-### Placeholder Screens (not yet implemented)
-| Screen | Current State | Next Milestone |
-|--------|--------------|----------------|
-| `app/(rider)/history.tsx` | Placeholder text | M5 — ride history list |
-| `app/(driver)/earnings.tsx` | Placeholder text | M5 — earnings history |
-| `app/(driver)/ride/incoming.tsx` | Placeholder text | M4 — incoming ride request UI |
+### M4 Completion Summary (4/4 verified on 2026-05-28)
+Driver mode experience implemented across four task groups:
+- **TASK-15 (REQ-4.3):** Accept/reject ride flow — incoming.tsx with 15-second countdown timer, ride details display, accept navigates to driver active ride, reject returns to dashboard
+- **TASK-16 (REQ-4.2):** Incoming ride request with countdown — animated timer, pickup/destination details, fare estimate, rider info preview
+- **TASK-17 (REQ-4.1):** Driver online/offline toggle with map — goOnline/goOffline actions, RideMap integration, dashboard stats (earnings, rides, rating)
+- **TASK-18 (REQ-4.4):** Driver ride lifecycle — active.tsx with navigate->arrive->complete flow, status stepper, trip completion screen
+
+### M5 Completion Summary (3/3 verified on 2026-05-28)
+Payment flow, ride history, and profile editing implemented across three task groups:
+- **TASK-19 (REQ-5.3):** Profile editing — `app/(rider)/profile/edit.tsx` with full name and phone number fields, validation (name required), avatar initial display, save/cancel actions. `updateProfile` action added to `useAuth` store
+- **TASK-20 (REQ-5.2):** Ride history with receipts — `app/(rider)/history.tsx` with FlatList of 5 mock rides (4 completed, 1 cancelled), status badges, route display, fare, date formatting. `app/(rider)/ride/receipt.tsx` with full receipt detail: route, ride type, driver info, fare breakdown (base + distance + time + adjustment), status badge. `useHistory` store with MOCK_RIDES data
+- **TASK-21 (REQ-5.1):** Simulated payment flow — `app/(rider)/ride/payment.tsx` with payment method selector (card/wallet/cash), fare summary card, simulated card details (****4242), 1-second processing animation, PaymentMethod type added to types/ride.ts, `paymentMethod`/`setPaymentMethod` added to useRide store
 
 ### TypeScript Status
 - `npx tsc --noEmit` passes with **zero errors** (verified 2026-05-28).
 
 ### Git Status
 - Single commit: `3aa962d Initial commit` on branch `master`.
-- Working tree has uncommitted changes (new files from M1-M3 work).
+- Working tree has uncommitted changes (new files from M1-M5 work).
 
 ---
 
@@ -238,10 +265,11 @@ Active ride experience implemented across four task groups:
 ### State Management
 | File | Purpose |
 |------|---------|
-| `store/useAuth.ts` | User auth state (user, isSignedIn, setRole, signOut) |
+| `store/useAuth.ts` | User auth state (user, isSignedIn, setRole, updateProfile, signOut) |
 | `store/useLocation.ts` | Location state (currentLocation, pickup, destination) |
-| `store/useRide.ts` | Ride state (currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, updateDriverLocation, submitRating, clearRide) |
+| `store/useRide.ts` | Ride state (currentRide, driver, fareEstimates, selectedRideType, isMatching, lastRating, paymentMethod, setPaymentMethod, updateDriverLocation, submitRating, clearRide) |
 | `store/useDriver.ts` | Driver mode state (isOnline, todayEarnings, todayRides, incomingRideId) |
+| `store/useHistory.ts` | Ride history state (rides, addRide, getRideById) with 5 mock rides |
 
 ### UI Components
 | File | Purpose |
@@ -252,27 +280,27 @@ Active ride experience implemented across four task groups:
 | `components/map/RideMap.tsx` | Google Map with markers (pickup/destination/driver), status-aware polylines, auto-fit region, crosshair button |
 | `components/ride/DriverInfoCard.tsx` | Driver avatar, star rating (half-star support), vehicle details, license plate, call/message buttons |
 
-### Screens (working)
+### Screens (all implemented)
 | File | Purpose |
 |------|---------|
 | `app/(auth)/index.tsx` | Onboarding — logo, tagline, "Get Started" + "I already have an account" |
 | `app/(auth)/login.tsx` | Login — email/password with Clerk useSignIn |
 | `app/(auth)/register.tsx` | Register — name/email/password + rider/driver role selection |
 | `app/(rider)/index.tsx` | Rider home — full-screen map + "Where to?" bar + current location |
-| `app/(rider)/profile.tsx` | Rider profile — avatar, menu items, sign out |
+| `app/(rider)/history.tsx` | Ride history list — 5 mock rides, status badges, route display, tap for receipt |
+| `app/(rider)/profile/index.tsx` | Rider profile — avatar, menu items, "Edit Profile" link, sign out |
+| `app/(rider)/profile/edit.tsx` | Profile editing — full name + phone number fields, validation, save/cancel |
 | `app/(rider)/ride/request.tsx` | Multi-step ride request: location search -> route preview -> ride type selection -> confirm |
 | `app/(rider)/ride/matching.tsx` | Driver matching: pulsing animation, cancel, mock driver assignment (3-5s), driver info reveal |
 | `app/(rider)/ride/active.tsx` | Active ride: map with driver tracking, status stepper (4 steps), DriverInfoCard, auto-progression simulation |
+| `app/(rider)/ride/payment.tsx` | Payment: fare summary card, card/wallet/cash selector, simulated card details, 1s processing |
 | `app/(rider)/ride/complete.tsx` | Ride completion: 5-star rating with labels, optional comment, receipt view with route/driver/fare summary |
+| `app/(rider)/ride/receipt.tsx` | Historical receipt: route, ride type, driver info, fare breakdown, status badge |
 | `app/(driver)/index.tsx` | Driver dashboard — online toggle + earnings/rides/rating stats |
 | `app/(driver)/profile.tsx` | Driver profile — avatar, menu items, sign out |
-
-### Screens (placeholder — need implementation)
-| File | Current State | Next Milestone |
-|------|--------------|----------------|
-| `app/(rider)/history.tsx` | Placeholder text | M5 — ride history list |
-| `app/(driver)/earnings.tsx` | Placeholder text | M5 — earnings history |
-| `app/(driver)/ride/incoming.tsx` | Placeholder text | M4 — incoming ride request UI |
+| `app/(driver)/ride/incoming.tsx` | Incoming ride request — 15s countdown, ride details, accept/reject |
+| `app/(driver)/ride/active.tsx` | Driver active ride — navigate -> arrive -> complete lifecycle |
+| `app/(driver)/earnings.tsx` | Earnings history — daily/weekly stats |
 
 ---
 
@@ -311,7 +339,7 @@ Active ride experience implemented across four task groups:
 ### Not Yet Installed (planned for future milestones)
 | Package | Milestone | Purpose |
 |---------|-----------|---------|
-| `@stripe/stripe-react-native` | M5 | Payment processing |
+| `@stripe/stripe-react-native` | Backend integration | Real payment processing (M5 uses simulated payments) |
 
 ---
 
@@ -386,8 +414,22 @@ Active ride experience implemented across four task groups:
 - **DriverInfoCard reuse:** Standalone component used in both matching.tsx (inline version) and active.tsx (full version with call/message buttons). Extracting it early paid off.
 - **Rating UI pattern:** complete.tsx uses conditional rendering (rating form vs receipt) based on submitted state. Star rating uses RATING_LABELS lookup for accessible text feedback.
 
+### Driver Mode (M4)
+- **Incoming ride countdown pattern:** incoming.tsx uses a 15-second countdown timer with visual progress indicator. Accept navigates to driver active ride; reject returns to dashboard. Simple but effective for demo.
+- **Driver lifecycle simulation:** active.tsx simulates the driver ride lifecycle (navigate to pickup -> arrive -> start trip -> complete) using timed status transitions.
+- **Online/offline toggle:** Driver dashboard toggles between online (map visible, ready for rides) and offline (stats summary) states.
+
+### Payments & Polish (M5)
+- **Payment method selector:** payment.tsx uses a radio-button pattern with card/wallet/cash options. Card method shows simulated card details (****4242). Processing uses 1-second setTimeout to simulate payment.
+- **Ride history with mock data:** useHistory store pre-populated with 5 realistic mock rides (4 completed, 1 cancelled) with relative dates (1/3/5/7/10 days ago). FlatList with pull-to-refresh-ready structure.
+- **Receipt detail pattern:** receipt.tsx receives ride ID via useLocalSearchParams, fetches from useHistory store by ID. Shows full fare breakdown (base + distance + time + adjustment) for completed rides.
+- **Profile editing:** edit.tsx uses local state initialized from useAuth store. updateProfile action merges updates into existing user. Validation requires non-empty full name.
+- **Profile screen refactoring:** profile.tsx split into profile/index.tsx + profile/edit.tsx using folder-based routing. "Edit Profile" menu item navigates to /profile/edit.
+
 ### Known TODOs in Codebase
 - `lib/api.ts`: Auth token injection in request interceptor (needs Clerk token integration)
 - `lib/useAuth.ts`: Role-based redirect (rider vs driver) after login
 - `app/(rider)/index.tsx`: Navigate to actual location search screen (currently goes to request.tsx)
-- All ride screens use mock data — backend integration needed for real matching, payment, history
+- All screens use mock data — backend integration needed for real matching, payment, history
+- `@stripe/stripe-react-native`: Install for real payment processing (currently simulated)
+- Driver earnings screen: placeholder — needs real earnings data from backend

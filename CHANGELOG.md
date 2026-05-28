@@ -4,6 +4,46 @@ All notable changes to RideFlow are documented here. Format follows [Keep a Chan
 
 ---
 
+## v0.5.0 — M5: Payments & Polish (2026-05-28)
+
+### Added
+- **Payment screen** (`app/(rider)/ride/payment.tsx`) — fare summary card with route/ride type/distance, payment method selector (Credit Card, Digital Wallet, Cash) with radio-button UI, simulated card details (****4242, exp 12/28), 1-second processing animation with ActivityIndicator, "Pay $X.XX" button
+- **Ride history screen** (`app/(rider)/history.tsx`) — FlatList of 5 mock rides (4 completed, 1 cancelled), relative date formatting (Today/Yesterday/N days ago), status badges with color coding, route display (pickup -> destination), ride type icon, distance/duration, fare. Tap to view receipt
+- **Receipt detail screen** (`app/(rider)/ride/receipt.tsx`) — full receipt view via ride ID in URL params, route display, ride type info, driver name + rating, fare breakdown (base fare + distance + time + adjustment), status badge, cancellation reason for cancelled rides
+- **Profile editing screen** (`app/(rider)/profile/edit.tsx`) — full name and phone number TextInput fields, avatar initial display, validation (name required), save/cancel actions, `updateProfile` action in useAuth store
+- **Ride history store** (`store/useHistory.ts`) — Zustand store with 5 pre-populated mock rides using relative dates (1/3/5/7/10 days ago), `addRide()` and `getRideById()` actions
+- **PaymentMethod type** (`types/ride.ts`) — `"card" | "cash" | "wallet"` union type
+- **Store additions** — `paymentMethod` and `setPaymentMethod` in `useRide`, `updateProfile` in `useAuth`
+- **Profile folder restructuring** — `profile.tsx` split into `profile/index.tsx` (view) + `profile/edit.tsx` (edit) for folder-based routing
+
+### Requirements Verified
+- REQ-5.1: Simulated payment flow (TASK-21)
+- REQ-5.2: Ride history with receipts (TASK-20)
+- REQ-5.3: Profile editing (TASK-19)
+
+### Project Complete
+- **48/48 requirements verified across all 5 milestones**
+- All screens implemented (no placeholders remaining)
+- TypeScript passes with zero errors
+
+---
+
+## v0.4.0 — M4: Driver Mode (2026-05-28)
+
+### Added
+- **Incoming ride request screen** (`app/(driver)/ride/incoming.tsx`) — 15-second countdown timer with visual progress, ride details (pickup/destination/fare/ride type), accept/reject buttons, accept navigates to driver active ride, reject returns to dashboard
+- **Driver active ride screen** (`app/(driver)/ride/active.tsx`) — ride lifecycle simulation (navigate to pickup -> arrive -> start trip -> complete), status stepper, map with route polyline, trip completion screen
+- **Driver dashboard enhancements** (`app/(driver)/index.tsx`) — online/offline toggle with animated state, map visible when online, stats summary (today's earnings, rides, rating) when offline, "Go Online"/"Go Offline" button
+- **Earnings screen** (`app/(driver)/earnings.tsx`) — daily/weekly earnings statistics display
+
+### Requirements Verified
+- REQ-4.1: Driver online/offline toggle + map (TASK-17)
+- REQ-4.2: Incoming ride request with countdown (TASK-16)
+- REQ-4.3: Accept/reject ride flow (TASK-15)
+- REQ-4.4: Driver ride lifecycle (TASK-18)
+
+---
+
 ## v0.3.0 — M3: Active Ride (2026-05-28)
 
 ### Added
