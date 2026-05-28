@@ -1,12 +1,28 @@
 {
   "name": "rideflow",
   "version": "1.0.0",
-  "main": "index.ts",
+  "main": "expo-router/entry",
   "dependencies": {
+    "@clerk/clerk-expo": "^2.19.31",
+    "axios": "^1.16.1",
     "expo": "~56.0.5",
+    "expo-constants": "~56.0.16",
+    "expo-linking": "~56.0.12",
+    "expo-location": "~56.0.14",
+    "expo-router": "~56.2.7",
+    "expo-secure-store": "^56.0.4",
     "expo-status-bar": "~56.0.4",
+    "nativewind": "^4.2.4",
     "react": "19.2.3",
-    "react-native": "0.85.3"
+    "react-native": "0.85.3",
+    "react-native-gesture-handler": "~2.31.1",
+    "react-native-maps": "^1.27.2",
+    "react-native-reanimated": "4.3.1",
+    "react-native-safe-area-context": "~5.7.0",
+    "react-native-screens": "4.25.2",
+    "socket.io-client": "^4.8.3",
+    "tailwindcss": "^3.4.17",
+    "zustand": "^5.0.13"
   },
   "devDependencies": {
     "@types/react": "~19.2.2",

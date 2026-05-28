@@ -30,12 +30,32 @@ yarn-error.*
 .DS_Store
 *.pem
 
-# local env files
+# Environment variables — NEVER commit secrets
+.env
+.env.*
 .env*.local
 
-# typescript
+# TypeScript
 *.tsbuildinfo
 
-# generated native folders
+# Generated native folders
 /ios
 /android
+
+# IDE / Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+coverage/
+
+# Build artifacts
+*.tgz
+*.tar.gz
+
+# Logs
+*.log
+logs/
