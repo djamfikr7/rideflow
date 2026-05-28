@@ -72,10 +72,10 @@
 
 | REQ | Description | Status | Tasks | Artifacts | Verified |
 |-----|-------------|--------|-------|-----------|----------|
-| REQ-4.1 | Driver online/offline toggle | NOT_STARTED | — | — | — |
-| REQ-4.2 | Incoming ride request | NOT_STARTED | — | — | — |
-| REQ-4.3 | Accept/reject ride flow | NOT_STARTED | — | — | — |
-| REQ-4.4 | Driver ride lifecycle | NOT_STARTED | — | — | — |
+| REQ-4.1 | Driver online/offline toggle + map | VERIFIED | TASK-17 | index.tsx goOnline/goOffline + RideMap | 2026-05-28 |
+| REQ-4.2 | Incoming ride request with countdown | VERIFIED | TASK-16 | incoming.tsx 15s timer, ride details, accept/reject | 2026-05-28 |
+| REQ-4.3 | Accept/reject ride flow | VERIFIED | TASK-15 | incoming.tsx handleAccept→active, handleReject→dashboard | 2026-05-28 |
+| REQ-4.4 | Driver ride lifecycle | VERIFIED | TASK-18 | active.tsx navigate→arrive→complete | 2026-05-28 |
 
 ---
 

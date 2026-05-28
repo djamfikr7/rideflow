@@ -1,11 +1,11 @@
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Animated } from "react-native";
 import { useEffect, useRef, useCallback } from "react";
 import { useRouter } from "expo-router";
 import { useSafeAreaInsets } from "react-native-safe-area-context";
 import { useDriver } from "../../store/useDriver";
 import { useLocation } from "../../store/useLocation";
 import RideMap from "../../components/map/RideMap";
-import type { Location, Ride } from "../../types/ride";
+import type { Ride } from "../../types/ride";
 
 // Simulated incoming ride request data
 const MOCK_INCOMING_RIDE: Ride = {
@@ -32,21 +32,18 @@ const MOCK_INCOMING_RIDE: Ride = {
 export default function DriverDashboard() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { isOnline, todayEarnings, todayRides, setOnline, setIncomingRide } = useDriver();
-  const { currentLocation } = useLocation();
+  const { isOnline, todayEarnings, todayRides, setIncomingRide, goOnline, goOffline } = useDriver();
+  const currentLocation = useLocation((s) => s.currentLocation);
   const rideRequestTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Simulate incoming ride request after going online
   useEffect(() => {
     if (isOnline) {
       rideRequestTimer.current = setTimeout(() => {
-        // Store the incoming ride data in the driver store
         setIncomingRide(MOCK_INCOMING_RIDE.id);
-        // Navigate to the incoming ride screen
         router.push("/(driver)/ride/incoming");
       }, 5000);
     } else {
-      // Clear timer if going offline
       if (rideRequestTimer.current) {
         clearTimeout(rideRequestTimer.current);
         rideRequestTimer.current = null;
@@ -61,9 +58,13 @@ export default function DriverDashboard() {
     };
   }, [isOnline, router, setIncomingRide]);
 
-  const handleToggleOnline = useCallback(() => {
-    setOnline(!isOnline);
-  }, [isOnline, setOnline]);
+  const handleToggleOnline = useCallback(async () => {
+    if (isOnline) {
+      goOffline();
+    } else {
+      await goOnline();
+    }
+  }, [isOnline, goOnline, goOffline]);
 
   return (
     <View className="flex-1 bg-white" style={{ paddingTop: insets.top }}>
@@ -89,63 +90,123 @@ export default function DriverDashboard() {
 
       {/* Map when online, Stats when offline */}
       {isOnline ? (
-        <View className="flex-1 mx-6 rounded-2xl overflow-hidden mb-6">
-          <RideMap
-            showPickup={false}
-            showDestination={false}
-            showMyLocationButton={true}
-          />
-          {/* Waiting overlay */}
-          <View className="absolute bottom-0 left-0 right-0 bg-white/90 py-4 px-6 items-center border-t border-gray-200">
-            <View className="flex-row items-center">
-              <View className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2" />
-              <Text className="text-base font-semibold text-gray-800">
-                Waiting for ride requests...
-              </Text>
-            </View>
-            <Text className="text-sm text-gray-500 mt-1">
-              Stay online to receive ride requests
-            </Text>
-          </View>
-        </View>
+        <OnlineContent
+          currentLocation={currentLocation}
+        />
       ) : (
-        <View className="flex-1 px-6">
-          {/* Stats */}
-          <View className="flex-row gap-4 mb-6">
-            <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
-              <Text className="text-3xl font-bold text-black">
-                ${todayEarnings.toFixed(2)}
-              </Text>
-              <Text className="text-gray-500 text-sm mt-1">Today's Earnings</Text>
-            </View>
-            <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
-              <Text className="text-3xl font-bold text-black">{todayRides}</Text>
-              <Text className="text-gray-500 text-sm mt-1">Rides Today</Text>
-            </View>
-          </View>
-
-          <View className="flex-row gap-4 mb-6">
-            <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
-              <Text className="text-3xl font-bold text-black">5.0</Text>
-              <Text className="text-gray-500 text-sm mt-1">Rating</Text>
-            </View>
-            <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
-              <Text className="text-3xl font-bold text-black">{todayRides}</Text>
-              <Text className="text-gray-500 text-sm mt-1">Total Rides</Text>
-            </View>
-          </View>
-
-          {/* Recent activity placeholder */}
-          <View className="bg-gray-50 rounded-2xl p-5">
-            <Text className="text-xs font-semibold text-gray-400 uppercase mb-3">
-              Recent Activity
-            </Text>
-            <Text className="text-sm text-gray-500 text-center py-4">
-              No rides today yet. Go online to start earning!
-            </Text>
-          </View>
-        </View>
+        <OfflineContent
+          todayEarnings={todayEarnings}
+          todayRides={todayRides}
+        />
       )}
+    </View>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Online: map + pulsing waiting indicator                            */
+/* ------------------------------------------------------------------ */
+
+function OnlineContent({
+  currentLocation,
+}: {
+  currentLocation: { lat: number; lng: number } | null;
+}) {
+  const pulseAnim = useRef(new Animated.Value(1)).current;
+
+  useEffect(() => {
+    const loop = Animated.loop(
+      Animated.sequence([
+        Animated.timing(pulseAnim, {
+          toValue: 0.3,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+        Animated.timing(pulseAnim, {
+          toValue: 1,
+          duration: 1000,
+          useNativeDriver: true,
+        }),
+      ])
+    );
+    loop.start();
+    return () => loop.stop();
+  }, [pulseAnim]);
+
+  return (
+    <View className="flex-1 mx-6 rounded-2xl overflow-hidden mb-6">
+      <RideMap
+        showPickup={false}
+        showDestination={false}
+        showMyLocationButton={true}
+        driverPosition={currentLocation ?? undefined}
+      />
+      {/* Waiting overlay with pulsing indicator */}
+      <View className="absolute bottom-0 left-0 right-0 bg-white/90 py-4 px-6 items-center border-t border-gray-200">
+        <View className="flex-row items-center">
+          <Animated.View
+            className="w-2.5 h-2.5 bg-green-500 rounded-full mr-2"
+            style={{ opacity: pulseAnim }}
+          />
+          <Text className="text-base font-semibold text-gray-800">
+            Waiting for ride requests...
+          </Text>
+        </View>
+        <Text className="text-sm text-gray-500 mt-1">
+          Stay online to receive ride requests
+        </Text>
+      </View>
+    </View>
+  );
+}
+
+/* ------------------------------------------------------------------ */
+/*  Offline: stats + recent activity                                   */
+/* ------------------------------------------------------------------ */
+
+function OfflineContent({
+  todayEarnings,
+  todayRides,
+}: {
+  todayEarnings: number;
+  todayRides: number;
+}) {
+  return (
+    <View className="flex-1 px-6">
+      {/* Stats */}
+      <View className="flex-row gap-4 mb-6">
+        <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
+          <Text className="text-3xl font-bold text-black">
+            ${todayEarnings.toFixed(2)}
+          </Text>
+          <Text className="text-gray-500 text-sm mt-1">Today's Earnings</Text>
+        </View>
+        <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
+          <Text className="text-3xl font-bold text-black">{todayRides}</Text>
+          <Text className="text-gray-500 text-sm mt-1">Rides Today</Text>
+        </View>
+      </View>
+
+      <View className="flex-row gap-4 mb-6">
+        <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
+          <Text className="text-3xl font-bold text-black">5.0</Text>
+          <Text className="text-gray-500 text-sm mt-1">Rating</Text>
+        </View>
+        <View className="flex-1 bg-gray-50 rounded-2xl p-5 items-center">
+          <Text className="text-3xl font-bold text-black">{todayRides}</Text>
+          <Text className="text-gray-500 text-sm mt-1">Total Rides</Text>
+        </View>
+      </View>
+
+      {/* Recent activity placeholder */}
+      <View className="bg-gray-50 rounded-2xl p-5">
+        <Text className="text-xs font-semibold text-gray-400 uppercase mb-3">
+          Recent Activity
+        </Text>
+        <Text className="text-sm text-gray-500 text-center py-4">
+          No rides today yet. Go online to start earning!
+        </Text>
+      </View>
     </View>
   );
 }

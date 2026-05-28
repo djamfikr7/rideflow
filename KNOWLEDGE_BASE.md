@@ -312,7 +312,6 @@ Active ride experience implemented across four task groups:
 | Package | Milestone | Purpose |
 |---------|-----------|---------|
 | `@stripe/stripe-react-native` | M5 | Payment processing |
-| `react-native-google-places-autocomplete` | M2 | Places Autocomplete search |
 
 ---
 
@@ -374,7 +373,21 @@ Active ride experience implemented across four task groups:
 - **Verification checklist:** TypeScript passes, no console errors, existing features still work.
 - **No library installs without approval:** Prevents dependency bloat and breaking changes.
 
+### Ride Booking Flow (M2)
+- **Multi-step request pattern:** request.tsx uses internal state (showRideTypes) to switch between search -> preview -> ride type selection without extra routes. Keeps all booking logic in one screen.
+- **Geocoding approach:** expo-location's geocodeAsync + reverseGeocodeAsync is sufficient for place search. No need for Google Places Autocomplete dependency. geocodeSearch() helper with timeout and limit handles the flow.
+- **Fare calculation:** Client-side using haversine distance (straight-line) * PER_KM_RATE * multiplier + estimated minutes * PER_MINUTE_RATE + BASE_FARE. Good enough for UI; real pricing would come from backend.
+- **Mock matching:** matching.tsx simulates driver search with 3-5s random delay, then assigns a hardcoded mock driver. This pattern allows testing the full flow without backend.
+
+### Active Ride (M3)
+- **Driver movement simulation:** Uses setInterval with 15% interpolation per tick (every 2s) toward target. Position snaps when within 0.00005 degrees. Simple but effective for demo.
+- **Status auto-progression:** active.tsx uses setTimeout chain (3s -> 8s -> 15s) to advance through matched -> driver_arriving -> in_progress -> completed. Final fare gets random +/- $1 variation from estimate.
+- **Status-aware polylines:** RideMap accepts rideStatus prop and renders different polylines: green for driver_arriving (driver->pickup), blue for in_progress (pickup->destination), dashed blue for preview (no active ride).
+- **DriverInfoCard reuse:** Standalone component used in both matching.tsx (inline version) and active.tsx (full version with call/message buttons). Extracting it early paid off.
+- **Rating UI pattern:** complete.tsx uses conditional rendering (rating form vs receipt) based on submitted state. Star rating uses RATING_LABELS lookup for accessible text feedback.
+
 ### Known TODOs in Codebase
 - `lib/api.ts`: Auth token injection in request interceptor (needs Clerk token integration)
 - `lib/useAuth.ts`: Role-based redirect (rider vs driver) after login
-- `app/(rider)/index.tsx`: Navigate to actual location search screen (currently goes to placeholder)
+- `app/(rider)/index.tsx`: Navigate to actual location search screen (currently goes to request.tsx)
+- All ride screens use mock data — backend integration needed for real matching, payment, history

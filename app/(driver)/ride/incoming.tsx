@@ -49,7 +49,7 @@ const CURRENT_DRIVER: DriverInfo = {
 export default function IncomingRide() {
   const router = useRouter();
   const insets = useSafeAreaInsets();
-  const { setOnline, setIncomingRide, incomingRideId, setTodayEarnings, todayEarnings, setTodayRides, todayRides } = useDriver();
+  const { setIncomingRide, incomingRideId } = useDriver();
   const { setCurrentRide, setDriver } = useRide();
   const { setPickup, setDestination } = useLocation();
 
@@ -57,6 +57,21 @@ export default function IncomingRide() {
   const [ride] = useState<Ride>(MOCK_INCOMING_RIDE);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const hasResponded = useRef(false);
+  const handleRejectRef = useRef<() => void>(() => {});
+
+  const handleReject = useCallback(() => {
+    if (timerRef.current) {
+      clearInterval(timerRef.current);
+      timerRef.current = null;
+    }
+
+    // Clear incoming ride and go back to dashboard
+    setIncomingRide(null);
+    router.replace("/(driver)");
+  }, [setIncomingRide, router]);
+
+  // Keep ref in sync with latest callback
+  handleRejectRef.current = handleReject;
 
   // Start countdown timer
   useEffect(() => {
@@ -66,7 +81,7 @@ export default function IncomingRide() {
           // Timer expired — auto-reject
           if (!hasResponded.current) {
             hasResponded.current = true;
-            handleReject();
+            handleRejectRef.current();
           }
           return 0;
         }
@@ -112,17 +127,6 @@ export default function IncomingRide() {
     // Navigate to active ride
     router.replace("/(driver)/ride/active");
   }, [ride, setCurrentRide, setDriver, setPickup, setDestination, setIncomingRide, router]);
-
-  const handleReject = useCallback(() => {
-    if (timerRef.current) {
-      clearInterval(timerRef.current);
-      timerRef.current = null;
-    }
-
-    // Clear incoming ride and go back to dashboard
-    setIncomingRide(null);
-    router.replace("/(driver)");
-  }, [setIncomingRide, router]);
 
   // If no incoming ride ID, redirect to dashboard
   if (!incomingRideId) {
