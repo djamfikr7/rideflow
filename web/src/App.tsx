@@ -10,6 +10,7 @@ import LoadingSpinner from './components/ui/LoadingSpinner';
 import LoginPage from './pages/auth/LoginPage';
 import RegisterPage from './pages/auth/RegisterPage';
 import VerifyPage from './pages/auth/VerifyPage';
+import RolePickerPage from './pages/auth/RolePickerPage';
 
 // Rider pages
 import HomePage from './pages/rider/HomePage';
@@ -42,16 +43,17 @@ function AppLayout({ children }: { children: React.ReactNode }) {
   );
 }
 
-function getDefaultRoute(role?: string): string {
+function getDefaultRoute(role?: string | null): string {
   switch (role) {
     case 'admin': return '/admin';
     case 'driver': return '/driver';
-    default: return '/';
+    case 'rider': return '/';
+    default: return '/choose-role';
   }
 }
 
 export default function App() {
-  const { setAuth, setUser, setToken, isSignedIn, user } = useAuth();
+  const { setAuth, setUser, setToken, isSignedIn, user, selectedRole } = useAuth();
   const [initializing, setInitializing] = useState(true);
 
   useEffect(() => {
@@ -63,7 +65,6 @@ export default function App() {
         if (currentUser) {
           setUser(currentUser);
         } else {
-          // Token invalid — clear
           setToken(null);
         }
       }
@@ -80,17 +81,22 @@ export default function App() {
     );
   }
 
-  const showNavbar = isSignedIn && user;
+  const targetRoute = getDefaultRoute(selectedRole);
 
   return (
     <BrowserRouter>
       <Routes>
         {/* Public routes */}
-        <Route path="/login" element={isSignedIn ? <Navigate to={getDefaultRoute(user?.role)} replace /> : <LoginPage />} />
-        <Route path="/register" element={isSignedIn ? <Navigate to={getDefaultRoute(user?.role)} replace /> : <RegisterPage />} />
+        <Route path="/login" element={isSignedIn ? <Navigate to={targetRoute} replace /> : <LoginPage />} />
+        <Route path="/register" element={isSignedIn ? <Navigate to={targetRoute} replace /> : <RegisterPage />} />
         <Route path="/verify" element={<VerifyPage />} />
 
-        {/* Rider routes */}
+        {/* Role picker — after login, before entering any app */}
+        <Route path="/choose-role" element={
+          <ProtectedRoute><RolePickerPage /></ProtectedRoute>
+        } />
+
+        {/* ============ RIDER APP ============ */}
         <Route path="/" element={<ProtectedRoute requiredRole="rider"><AppLayout><HomePage /></AppLayout></ProtectedRoute>} />
         <Route path="/ride/request" element={<ProtectedRoute requiredRole="rider"><AppLayout><RideRequestPage /></AppLayout></ProtectedRoute>} />
         <Route path="/ride/matching" element={<ProtectedRoute requiredRole="rider"><AppLayout><RideMatchingPage /></AppLayout></ProtectedRoute>} />
@@ -113,7 +119,7 @@ export default function App() {
         <Route path="/admin/payments" element={<ProtectedRoute requiredRole="admin"><AppLayout><PaymentsPage /></AppLayout></ProtectedRoute>} />
 
         {/* Catch-all */}
-        <Route path="*" element={<Navigate to={isSignedIn ? getDefaultRoute(user?.role) : '/login'} replace />} />
+        <Route path="*" element={<Navigate to={isSignedIn ? targetRoute : '/login'} replace />} />
       </Routes>
     </BrowserRouter>
   );

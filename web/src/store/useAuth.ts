@@ -6,11 +6,13 @@ interface AuthState {
   token: string | null;
   isSignedIn: boolean;
   isLoading: boolean;
+  selectedRole: 'rider' | 'driver' | 'admin' | null;
 
   setUser: (user: User | null) => void;
   setToken: (token: string | null) => void;
   setAuth: (user: User, token: string) => void;
   setRole: (role: UserRole) => void;
+  setSelectedRole: (role: 'rider' | 'driver' | 'admin' | null) => void;
   updateProfile: (updates: Partial<Pick<User, 'fullName' | 'phone' | 'avatarUrl'>>) => void;
   signOut: () => void;
 }
@@ -20,6 +22,7 @@ export const useAuth = create<AuthState>((set) => ({
   token: null,
   isSignedIn: false,
   isLoading: false,
+  selectedRole: null,
 
   setUser: (user) => set({ user, isSignedIn: !!user }),
 
@@ -42,6 +45,8 @@ export const useAuth = create<AuthState>((set) => ({
     set((state) => ({
       user: state.user ? { ...state.user, role } : null,
     })),
+
+  setSelectedRole: (role) => set({ selectedRole: role }),
 
   updateProfile: (updates) =>
     set((state) => {
